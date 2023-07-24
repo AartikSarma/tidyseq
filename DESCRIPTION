@@ -14,8 +14,8 @@ Depends:
     edgeR,
     DESeq2,
     IHW,
-    ggrepel, 
     scales,
+    ggrepel,
     RColorBrewer,
     multienrichjam
 Suggests: 
