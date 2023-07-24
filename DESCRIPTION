@@ -1,0 +1,23 @@
+Package: baton
+Type: Package
+Title: Transcriptomics and Pathway Analysis Tools
+Version: 0.1.1
+Author: Aartik Sarma
+Maintainer: Aartik Sarma <aartik.sarma@ucsf.edu>
+Description: This library includes functions for common tasks in sequencing, differential expression, and pathway analysis
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    tidyverse,
+    limma,
+    edgeR,
+    DESeq2,
+    IHW,
+    ggrepel, 
+    RColorBrewer,
+    multienrichjam
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
