@@ -1,0 +1,31 @@
+Import count data and metadata :
+QC samples, remove technical outliers :
+qc_plots_rnaseq
+qc_plots_microarray
+
+Plot PCA :
+pca_plot_microarray
+pca_plot_rnaseq
+
+Differential expression :
+microarray_to_limma
+rnaseq_to_limma
+rnaseq_to_deseq2
+rnaseq_to_dream
+mngs_to_metagenomeseq
+
+limma_to_dge
+deseq2_to_dge
+dream_to_dge
+metagenomeseq_to_da
+
+plot_dge_volcano
+dge_to_gsea :
+dge_to_gsva :
+export_to_ipa, import_from_ipa :
+gsea_dotplot :
+gsva_boxplot :
+ipa_dotplot :
+merge_gsea_tables, merge_gsva_tables, merge_ipa_tables :
+export_dge_to_xlsx, export_gsea_to_xlsx, export_gsva_to_xlsx, : export_ipa_to_xlsx :
+

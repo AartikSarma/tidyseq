@@ -4,21 +4,27 @@ Title: Transcriptomics and Pathway Analysis Tools
 Version: 0.1.1
 Author: Aartik Sarma
 Maintainer: Aartik Sarma <aartik.sarma@ucsf.edu>
-Description: This library includes functions for common tasks in sequencing, differential expression, and pathway analysis
-License: MIT
+Description: This library includes functions for common tasks in sequencing, differential expression, and pathway analysis.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends: 
-    tidyverse,
+  tidyverse
+Imports: 
+  AnnotationDbi,
+  DESeq2,
+  dplyr,
+  edgeR,
+  fgsea,
+  ggplot2,
+  ggrepel,
+    GSVA,
     limma,
-    edgeR,
-    DESeq2,
-    IHW,
-    scales,
-    ggrepel,
-    RColorBrewer,
-    multienrichjam
+    msigdbr,
+    tibble,
+    tidyverse
 Suggests: 
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+RoxygenNote: 7.2.3
