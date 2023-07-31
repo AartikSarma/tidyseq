@@ -1,42 +1,48 @@
-#' Differential expression analysis with limma and voom
+#' Differential expression analysis with limma-voom  
 #'
-#' Perform differential expression analysis on count data using limma + voom
+#' Perform differential expression analysis on RNA-seq count data using limma-voom
 #'
-#' @param metadata Metadata table  
-#' @param counts Count data
-#' @param design Model design formula 
-#'
-#' @return Fitted limma model object
+#' @param metadata Metadata table
+#' @param counts Count data table
+#' @param design Model design formula
+#' 
+#' @return Limma model fit object
 #'
 #' @examples
-#' metadata <- tibble(sample = c("s1","s2","s3"),
-#'                    type = c("treated","untreated","treated"))
-#' counts <- tibble(gene_id = c("ENSG1","ENSG2"),
-#'                  s1 = c(10,20), 
-#'                  s2 = c(15,50),
-#'                  s3 = c(20,100))
-#' design <- ~ type
-#' limma_model <- rnaseq_to_limma(metadata, counts, design)  
-#'
-#' @importFrom limma voom  lmFit eBayes
-#' @importFrom edgeR DGEList
+#' metadata <- readRDS("metadata.rds")
+#' counts <- readRDS("counts.rds")
+#' design <- ~ condition + batch
+#' model <- rnaseq_to_limma(metadata, counts, design)
+#' 
+#' @importFrom limma DGEList voom lmFit eBayes calcNormFactors filterByExpr
+#' @importFrom dplyr filter
 #' @export
 
 rnaseq_to_limma <- function(metadata, counts, design) {
   
+  # Create design matrix
+  mm <- model.matrix(design, metadata)
+  
+  # Create DGEList object
+  dge <- DGEList(counts[,2:ncol(counts)], # count data
+                 genes = counts[,1], # gene ids
+                 samples = metadata) # sample data
+  
+  # Normalize 
+  dge <- calcNormFactors(dge)
+  
+  # Filter low counts
+  keep <- filterByExpr(dge, design = mm)
+  
   # Voom transformation
-  v <- voom(counts[,2:ncol(counts)], design, plot=FALSE)
+  v <- voom(dge[keep,], plot = FALSE) 
   
-  # Create DGEList
-  dge <- DGEList(v$E, genes=counts$gene_id)
-  
-  # Linear model fit
-  design <- model.matrix(design, data=metadata) 
-  dge <- lmFit(dge, design)
+  # Fit linear model
+  fit <- lmFit(v, mm)
   
   # Empirical Bayes statistics
-  dge <- eBayes(dge)
+  fit <- eBayes(fit, robust=TRUE)
   
-  return(dge)
+  return(fit)
   
 }

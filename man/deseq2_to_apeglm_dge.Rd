@@ -9,19 +9,25 @@ deseq2_to_apeglm_dge(
   var_interest,
   numerator = NULL,
   denominator = NULL,
-  use_adaptiveshrink = TRUE
+  use_adaptiveshrink = TRUE,
+  save_output = NULL,
+  output_filename = NULL
 )
 }
 \arguments{
-\item{dds}{DESeqDataSet after differential expression analysis}
+\item{dds}{DESeqDataSet after DE analysis}
 
 \item{var_interest}{Variable of interest}
 
-\item{numerator}{Numerator value for variable}
+\item{numerator}{Numerator value (default NULL)}
 
-\item{denominator}{Denominator value for variable}
+\item{denominator}{Denominator value (default NULL)}
 
-\item{use_adaptiveshrink}{Logical, use adaptive prior (default TRUE)}
+\item{use_adaptiveshrink}{Logical for adaptive prior (default TRUE)}
+
+\item{save_output}{Logical to save results (default NULL)}
+
+\item{output_filename}{Custom filename for results (default NULL)}
 }
 \value{
 Shrunken DESeq2 results as tidy table
@@ -30,8 +36,9 @@ Shrunken DESeq2 results as tidy table
 Extract shrunken DESeq2 results (apeglm)
 }
 \examples{
-dds <- DESeq(dds)
-results <- deseq2_to_apeglm_dge(dds, var_interest="condition",
-                                numerator=1, denominator=0)
+\dontrun{
+options(save.output = TRUE)
+results <- deseq2_to_apeglm_dge(dds, save_output = FALSE)  
+}
 
 }

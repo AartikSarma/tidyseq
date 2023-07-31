@@ -12,6 +12,11 @@ dge_to_gsea(
   msigdb_category = "H",
   msigdb_subcategory = NULL,
   minSize = 30,
+  save_output = NULL,
+  var_interest = NULL,
+  numerator = NULL,
+  denominator = NULL,
+  output_filename = NULL,
   ...
 )
 }
@@ -29,6 +34,16 @@ dge_to_gsea(
 \item{msigdb_subcategory}{msigdb subcategory (default NULL)}
 
 \item{minSize}{Minimum gene set size (default 30)}
+
+\item{save_output}{Logical to save results (default NULL)}
+
+\item{var_interest}{Variable of interest if saving file (default NULL)}
+
+\item{numerator}{Numerator value (default NULL)}
+
+\item{denominator}{Denominator value (default NULL)}
+
+\item{output_filename}{Custom filename for results (default NULL)}
 
 \item{...}{Additional parameters for fgseaMultilevel()}
 }

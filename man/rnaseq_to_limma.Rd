@@ -2,31 +2,27 @@
 % Please edit documentation in R/rnaseq_to_limma.R
 \name{rnaseq_to_limma}
 \alias{rnaseq_to_limma}
-\title{Differential expression analysis with limma and voom}
+\title{Differential expression analysis with limma-voom}
 \usage{
 rnaseq_to_limma(metadata, counts, design)
 }
 \arguments{
 \item{metadata}{Metadata table}
 
-\item{counts}{Count data}
+\item{counts}{Count data table}
 
 \item{design}{Model design formula}
 }
 \value{
-Fitted limma model object
+Limma model fit object
 }
 \description{
-Perform differential expression analysis on count data using limma + voom
+Perform differential expression analysis on RNA-seq count data using limma-voom
 }
 \examples{
-metadata <- tibble(sample = c("s1","s2","s3"),
-                   type = c("treated","untreated","treated"))
-counts <- tibble(gene_id = c("ENSG1","ENSG2"),
-                 s1 = c(10,20), 
-                 s2 = c(15,50),
-                 s3 = c(20,100))
-design <- ~ type
-limma_model <- rnaseq_to_limma(metadata, counts, design)  
+metadata <- readRDS("metadata.rds")
+counts <- readRDS("counts.rds")
+design <- ~ condition + batch
+model <- rnaseq_to_limma(metadata, counts, design)
 
 }

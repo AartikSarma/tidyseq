@@ -9,6 +9,11 @@
 #' @param msigdb_category msigdb category to use (default 'H')
 #' @param msigdb_subcategory msigdb subcategory (default NULL)
 #' @param minSize Minimum gene set size (default 30)
+#' @param save_output Logical to save results (default NULL) 
+#' @param var_interest Variable of interest if saving file (default NULL)
+#' @param numerator Numerator value (default NULL)
+#' @param denominator Denominator value (default NULL)
+#' @param output_filename Custom filename for results (default NULL)
 #' @param ... Additional parameters for fgseaMultilevel()
 #'
 #' @return DataFrame with GSEA results
@@ -30,6 +35,11 @@ dge_to_gsea <- function(dge.res,
                         msigdb_category = "H",
                         msigdb_subcategory = NULL,
                         minSize = 30,
+                        save_output = NULL,
+                        var_interest = NULL, 
+                        numerator = NULL,
+                        denominator = NULL,
+                        output_filename = NULL,
                         ...) {
   
   # Get msigdb gene sets
@@ -58,6 +68,27 @@ dge_to_gsea <- function(dge.res,
                                      nPermSimple = nPermSimple,
                                      BPPARAM = BiocParallel::SnowParam(6, progressbar = T),
                                      ...)
+  
+  # Determine if saving outputs
+  save <- coalesce(save_output, getOption("save.output"))
+  
+  if(save) {
+    
+    # Construct coefficient name
+    ifelse((is.null(numerator) & is.null(denominator)), 
+           coef_name <- var_interest, 
+           coef_name <- paste(var_interest, numerator, "vs", denominator, sep="_")
+    )
+    
+    # Set output filename if not provided
+    if(is.null(output_filename)) {
+      output_filename <- paste0(coef_name,".", msigdb_category, ".gsea.Rds") 
+    }
+    
+    # Save results
+    saveRDS(gsea_res, file.path("output", output_filename))
+  }
+  
   
   return(gsea_res)
   

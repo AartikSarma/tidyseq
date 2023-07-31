@@ -4,16 +4,29 @@
 \alias{deseq2_to_ashr_dge}
 \title{Extract shrunken DESeq2 results (ashr)}
 \usage{
-deseq2_to_ashr_dge(dds, var_interest, numerator, denominator)
+deseq2_to_ashr_dge(
+  dds,
+  var_interest,
+  numerator = NULL,
+  denominator = NULL,
+  save_output = NULL,
+  output_filename = NULL
+)
 }
 \arguments{
-\item{dds}{DESeqDataSet after differential expression analysis}
+\item{dds}{DESeqDataSet after DE analysis}
 
 \item{var_interest}{Variable of interest}
 
-\item{numerator}{Numerator value for variable}
+\item{numerator}{Numerator value (default NULL)}
 
-\item{denominator}{Denominator value for variable}
+\item{denominator}{Denominator value (default NULL)}
+
+\item{save_output}{Logical to save results (default NULL)}
+
+\item{output_filename}{Custom filename for results (default NULL)}
+
+\item{use_adaptiveshrink}{Logical for adaptive prior (default TRUE)}
 }
 \value{
 Shrunken DESeq2 results as tidy table
@@ -22,8 +35,9 @@ Shrunken DESeq2 results as tidy table
 Extract shrunken DESeq2 results (ashr)
 }
 \examples{
-dds <- DESeq(dds)  
-results <- deseq2_to_ashr_dge(dds, var_interest="condition", 
-                              numerator=1, denominator=0)
+\dontrun{
+options(save.output = TRUE)
+results <- deseq2_to_apeglm_dge(dds, save_output = FALSE)  
+}
 
 }
