@@ -18,18 +18,18 @@
 #' design <- ~ type 
 #' de_results <- rnaseq_to_deseq2(metadata, counts, design)
 #'
-#' @importFrom DESeq2 DESeqDataSet DESeq
+#' @importFrom DESeq2 DESeqDataSet DESeq DESeqDataSetFromMatrix
 #' @export
 
 rnaseq_to_deseq2 <- function(metadata, counts, design) {
   
   # Create DESeqDataSet
-  dds <- DESeqDataSetFromMatrix(countData = counts[,2:ncol(counts)],
+  dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts %>% column_to_rownames("gene_id"),
                                 colData = metadata,
                                 design = as.formula(design))
   
   # Differential expression analysis
-  dds <- DESeq(dds)
+  dds <- DESeq2::DESeq(dds, parallel = T)
   
   return(dds)
   

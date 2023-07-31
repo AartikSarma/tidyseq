@@ -45,11 +45,11 @@ dge_to_gsea <- function(dge.res,
   
   # Prepare DE results
   de_mat <- dge.res %>%
-    arrange(-log2FoldChange) %>%
-    filter(!is.na(log2FoldChange), !is.na(hgnc_symbol)) %>%  
-    select(hgnc_symbol, log2FoldChange) %>%
+    arrange(-logFC) %>%
+    filter(!is.na(logFC), !is.na(hgnc_symbol)) %>%  
+    select(hgnc_symbol, logFC) %>%
     group_by(hgnc_symbol) %>%
-    summarize(log2FoldChange = mean(log2FoldChange)) %>%
+    summarize(logFC = mean(logFC)) %>%
     tibble::deframe()
   
   # Run GSEA 

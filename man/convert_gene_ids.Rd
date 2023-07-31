@@ -4,12 +4,14 @@
 \alias{convert_gene_ids}
 \title{Convert gene IDs to symbols}
 \usage{
-convert_gene_ids(results, species)
+convert_gene_ids(results, species, id_type = "ENSG")
 }
 \arguments{
 \item{results}{Tidy DE results table}
 
 \item{species}{Species name (eg. "human", "mouse")}
+
+\item{id_type}{Species name (eg. "ENSG", "ENTREZ")}
 }
 \value{
 Results table with gene symbols

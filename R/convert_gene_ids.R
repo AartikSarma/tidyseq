@@ -3,6 +3,7 @@
 #'
 #' @param results Tidy DE results table 
 #' @param species Species name (eg. "human", "mouse")
+#' @param id_type Species name (eg. "ENSG", "ENTREZ")
 #' 
 #' @return Results table with gene symbols
 #'
@@ -11,10 +12,10 @@
 #' results = convert_gene_ids(results, species="human")
 #'
 #' @importFrom AnnotationDbi mapIds  
-#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate select rename
 #' @export
 
-convert_gene_ids <- function(results, species) {
+convert_gene_ids <- function(results, species, id_type = "ENSG") {
   
   # Get appropriate org db for species  
   if(species == "human") {
@@ -22,15 +23,12 @@ convert_gene_ids <- function(results, species) {
   } else if(species == "mouse") {
     org_db <- org.Mm.eg.db
   }
-  
-  # Determine ID type
-  id_type <- unique(str_split(results$gene_id[1], "\\.")[[1]][1])
-  
+
   if(id_type == "ENSG") {
     # Map Ensembl IDs
     mapped_ids <- mapIds(org_db, keys=results$gene_id,
                          keytype="ENSEMBL", column="SYMBOL") 
-  } else if(id_type == "ENTREZID") {
+  } else if(id_type == "ENTREZ") {
     # Map Entrez IDs
     mapped_ids <- mapIds(org_db, keys=results$gene_id, 
                          keytype="ENTREZID", column="SYMBOL")
@@ -38,8 +36,8 @@ convert_gene_ids <- function(results, species) {
   
   # Replace IDs with symbols
   results <- left_join(results, mapped_ids, by="gene_id") %>%
-    select(-gene_id) %>%
-    rename(gene_id = SYMBOL)
+    dplyr::select(-gene_id) %>%
+    dplyr::rename(gene_id = SYMBOL)
   
   return(results)
   
