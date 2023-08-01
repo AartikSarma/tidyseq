@@ -1,4 +1,4 @@
-Package: baton
+Package: tidyseq
 Type: Package
 Title: Transcriptomics and Pathway Analysis Tools
 Version: 0.1.1
