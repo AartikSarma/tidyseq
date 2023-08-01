@@ -2,30 +2,38 @@
 % Please edit documentation in R/limma_to_dge.R
 \name{limma_to_dge}
 \alias{limma_to_dge}
-\title{Convert limma results to tidy table}
+\title{Extract differential expression results from limma model}
 \usage{
-limma_to_dge(model, contrast)
+limma_to_dge(
+  fit,
+  var_interest,
+  numerator = NULL,
+  denominator = NULL,
+  save_output = NULL,
+  output_filename = NULL
+)
 }
 \arguments{
-\item{model}{Fitted limma model object}
+\item{fit}{Limma model fit object}
 
-\item{contrast}{Contrast to extract results for}
+\item{var_interest}{Variable of interest}
+
+\item{numerator}{Numerator level}
+
+\item{denominator}{Denominator level}
+
+\item{save_output}{Logical to save output}
+
+\item{output_filename}{Custom filename for output}
 }
 \value{
-Tidy tibble with DE results
+Tibble with DE results
 }
 \description{
-Convert limma results to tidy table
+Extract differential expression results from limma model
 }
 \examples{
-metadata <- tibble(sample = c("s1","s2","s3"),
-                   type = c("treated","untreated","treated"))  
-expression <- matrix(rnorm(9*200), nrow = 9, ncol = 200)
-design <- model.matrix(~ type, data = metadata) 
-limma_model <- lmFit(expression, design)
-limma_model <- eBayes(limma_model)
- 
-# Get results for treated vs untreated
-de_table <- limma_to_dge(limma_model, contrast = c(-1,1,0)) 
+fit <- rnaseq_to_limma(metadata, counts, design)
+results <- limma_to_dge(fit, "condition", 1, 0)
 
 }

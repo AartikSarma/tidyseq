@@ -6,6 +6,7 @@
 \usage{
 deseq2_to_apeglm_dge(
   dds,
+  ihw.fdrs = TRUE,
   var_interest,
   numerator = NULL,
   denominator = NULL,
@@ -16,6 +17,8 @@ deseq2_to_apeglm_dge(
 }
 \arguments{
 \item{dds}{DESeqDataSet after DE analysis}
+
+\item{ihw.fdrs}{Use the IHW package to calculate FDRs (default TRUE)}
 
 \item{var_interest}{Variable of interest}
 

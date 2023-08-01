@@ -1,6 +1,7 @@
 #' Extract shrunken DESeq2 results (apeglm)
 #'
 #' @param dds DESeqDataSet after DE analysis  
+#' @param ihw.fdrs Use the IHW package to calculate FDRs (default TRUE)
 #' @param var_interest Variable of interest
 #' @param numerator Numerator value (default NULL)
 #' @param denominator Denominator value (default NULL)
@@ -21,6 +22,7 @@
 #' @export
 
 deseq2_to_apeglm_dge <- function(dds, 
+                                 ihw.fdrs = TRUE,
                                  var_interest, 
                                  numerator = NULL,
                                  denominator = NULL,
@@ -41,8 +43,18 @@ deseq2_to_apeglm_dge <- function(dds,
                    type="apeglm",
                    apeAdapt =use_adaptiveshrink)
   
+  # Add indepdent hypothesis weighted FDRs
+  if(ihw.fdrs){
+    res <-
+      res %>%
+      mutate(padj = ihw(pvalue, baseMean, alpha = 0.1) %>% adj_pvalues())
+  }
+  
   # Format results
-  res <- format_results(res)
+  res <- res %>%
+    as.data.frame() %>%
+    rownames_to_column("gene_id") %>%
+    dplyr::select(gene_id, logFC = log2FoldChange, pvalue, fdr = padj) 
   
   # Determine if saving outputs
   save <- coalesce(save_output, getOption("save.output"))
@@ -60,14 +72,4 @@ deseq2_to_apeglm_dge <- function(dds,
   
   return(res)
   
-}
-
-# Helper function  
-format_results <- function(res) {
-  res %>%
-    as.data.frame() %>%
-    rownames_to_column("gene_id") %>%
-    select(gene_id, log2FoldChange, pvalue, padj) %>% 
-    rename(logFC = log2FoldChange,  
-           fdr = padj)
 }
