@@ -43,7 +43,7 @@ plot_volcano <- function(dge.res,
       arrange(pvalue) %>%  
       filter(abs(logFC) > fc_cutoff, fdr < fdr_cutoff, !is.na(gene_label_col)) %>%
       group_by(sign(logFC)) %>%
-      filter(row_number() <= n.labels) %>%
+      filter(row_number() <= n_labels) %>%
       pull(gene_label_col)
   }
   
