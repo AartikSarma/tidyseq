@@ -1,14 +1,15 @@
 
 #' Generate volcano plot for differential expression results
 #'
-#' @param deseq.res Tidy DE results table
-#' @param col.up Color for upregulated points (default 'red') 
-#' @param col.down Color for downregulated points (default 'blue')
-#' @param gene.labels Vector of gene labels to highlight (default NULL)  
-#' @param n.labels Number of top genes to label (default 10)
-#' @param fcCutoff Fold change cutoff for significance (default 0.5)
-#' @param fdrCutoff FDR cutoff for significance (default 0.1)
-#' @param plot.title Plot title text (default '')
+#' @param dge.res Tidy DE results table
+#' @param col_up Color for upregulated points (default 'red') 
+#' @param col_down Color for downregulated points (default 'blue')
+#' @param gene_label_col Column with gene labels to highlight (default NULL) 
+#' @param gene_labels Vector of gene labels to highlight (default NULL)  
+#' @param n_labels Number of top genes to label (default 10)
+#' @param fc_cutoff Fold change cutoff for significance (default 0.5)
+#' @param fdr_cutoff FDR cutoff for significance (default 0.1)
+#' @param plot_title Plot title text (default '')
 #'
 #' @return ggplot2 object with volcano plot
 #'
@@ -19,52 +20,58 @@
 #' @importFrom ggplot2 ggplot aes geom_point 
 #' @importFrom dplyr filter arrange case_when mutate
 #' @importFrom ggrepel geom_text_repel
+#' @importFrom scales squish
 #' @export
 
-plot_volcano <- function(deseq.res, 
-                         col.up = "red", 
-                         col.down = "blue",
-                         gene.labels = NULL,
-                         n.labels = 10,
-                         fcCutoff = 0.5,
-                         fdrCutoff = 0.1,
-                         plot.title = "") {
+plot_volcano <- function(dge.res, 
+                         col_up = "red", 
+                         col_down = "blue",
+                         gene_label_col = "hgnc_symbol",
+                         gene_labels = NULL,
+                         n_labels = 10,
+                         fc_cutoff = 0.5,
+                         fdr_cutoff = 0.1,
+                         plot_title = "") {
+  
+  dge.res <- 
+    dge.res %>%
+    mutate(gene_label_col = eval(parse(text = gene_label_col)))
   
   # Label top DE genes if labels not provided
-  if(is.null(gene.labels)) {
-    gene.labels <- deseq.res %>%
+  if(is.null(gene_labels)) {
+    gene_labels <- dge.res %>%
       arrange(pvalue) %>%  
-      filter(abs(log2FoldChange) > fcCutoff, fdr < fdrCutoff, !is.na(hgnc_symbol)) %>%
-      group_by(sign(log2FoldChange)) %>%
+      filter(abs(logFC) > fc_cutoff, fdr < fdr_cutoff, !is.na(gene_label_col)) %>%
+      group_by(sign(logFC)) %>%
       filter(row_number() <= n.labels) %>%
-      pull(hgnc_symbol)
+      pull(gene_label_col)
   }
   
-  # Determine axis limits
-  xmin <- min(deseq.res$log2FoldChange, na.rm = T)
-  xmax <- max(deseq.res$log2FoldChange, na.rm = T)
-  ymax <- max(-log(deseq.res$pvalue, 10), na.rm = T)
+  # Determine default axis limits
+  xmin <- min(dge.res$logFC, na.rm = T)
+  xmax <- max(dge.res$logFC, na.rm = T)
+  ymax <- max(-log(dge.res$pvalue, 10), na.rm = T)
   
   # Color points by significance
-  deseq.res <- deseq.res %>%
+  dge.res <- dge.res %>%
     mutate(
       sig.color = case_when(
-        fdr < fdrCutoff & log2FoldChange > fcCutoff ~ col.up,
-        fdr < fdrCutoff & log2FoldChange < -fcCutoff ~ col.down,
+        fdr < fdr_cutoff & logFC > fc_cutoff ~ col.up,
+        fdr < fdr_cutoff & logFC < -fc_cutoff ~ col.down,
         TRUE ~ "gray75"
       ),
       sig.alpha = case_when(
-        fdr < fdrCutoff & log2FoldChange > fcCutoff ~ 1,
-        fdr < fdrCutoff & log2FoldChange < -fcCutoff ~ 1,
+        fdr < fdr_cutoff & logFC > fc_cutoff ~ 1,
+        fdr < fdr_cutoff & logFC < -fc_cutoff ~ 1,
         TRUE ~ 0.65
       ),
       labels = case_when(
-        (hgnc_symbol %in% gene.labels) & (fdr < fdrCutoff) ~ hgnc_symbol)
+        (gene_label_col %in% gene_labels) & (fdr < fdr_cutoff) ~ gene_label_col)
     )
   
   # Generate plot
-  p <- deseq.res %>%
-    ggplot(aes(x = log2FoldChange, y = -log(pvalue, 10), 
+  p <- dge.res %>%
+    ggplot(aes(x = logFC, y = -log(pvalue, 10), 
                color = sig.color, alpha = sig.alpha)) +
     geom_point() +
     geom_text_repel(aes(label = labels), color="black") +

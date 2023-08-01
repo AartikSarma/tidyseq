@@ -46,6 +46,7 @@ deseq2_to_ashr_dge <- function(dds,
   if(ihw.fdrs){
     res <-
       res %>%
+      as.data.frame() %>%
          mutate(padj = ihw(pvalue, baseMean, alpha = 0.1) %>% adj_pvalues())
   }
   
