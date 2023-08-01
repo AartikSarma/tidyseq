@@ -14,7 +14,8 @@
 #' design <- ~ condition + batch
 #' model <- rnaseq_to_limma(metadata, counts, design)
 #' 
-#' @importFrom limma DGEList voom lmFit eBayes calcNormFactors filterByExpr
+#' @importFrom edgeR DGEList filterByExpr calcNormFactors
+#' @importFrom limma  voom lmFit eBayes  
 #' @importFrom dplyr filter
 #' @export
 
