@@ -7,13 +7,8 @@
 #' @param gene_label_col Column with gene labels to highlight (default NULL) 
 #' @param gene_labels Vector of gene labels to highlight (default NULL)  
 #' @param n_labels Number of top genes to label (default 10)
-<<<<<<< HEAD
-#' @param fc_cutoff Fold change cutoff for significance (default 0.5)
-#' @param fdr_cutoff FDR cutoff for significance (default 0.1)
-=======
 #' @param fc_Cutoff Fold change cutoff for significance (default 0.5)
 #' @param fdr_Cutoff FDR cutoff for significance (default 0.1)
->>>>>>> 1ff33a9052914245c8faa43c8cae1f46f374e13d
 #' @param plot_title Plot title text (default '')
 #'
 #' @return ggplot2 object with volcano plot
@@ -34,13 +29,8 @@ plot_volcano <- function(dge.res,
                          gene_label_col = "hgnc_symbol",
                          gene_labels = NULL,
                          n_labels = 10,
-<<<<<<< HEAD
-                         fc_cutoff = 0.5,
-                         fdr_cutoff = 0.1,
-=======
                          fc_Cutoff = 0.5,
                          fdr_Cutoff = 0.1,
->>>>>>> 1ff33a9052914245c8faa43c8cae1f46f374e13d
                          plot_title = "") {
   
   dge.res <- 
@@ -51,15 +41,9 @@ plot_volcano <- function(dge.res,
   if(is.null(gene_labels)) {
     gene_labels <- dge.res %>%
       arrange(pvalue) %>%  
-<<<<<<< HEAD
       filter(abs(logFC) > fc_cutoff, fdr < fdr_cutoff, !is.na(gene_label_col)) %>%
       group_by(sign(logFC)) %>%
       filter(row_number() <= n_labels) %>%
-=======
-      filter(abs(logFC) > fcCutoff, fdr < fdrCutoff, !is.na(gene_label_col)) %>%
-      group_by(sign(logFC)) %>%
-      filter(row_number() <= n.labels) %>%
->>>>>>> 1ff33a9052914245c8faa43c8cae1f46f374e13d
       pull(gene_label_col)
   }
   
@@ -72,7 +56,6 @@ plot_volcano <- function(dge.res,
   dge.res <- dge.res %>%
     mutate(
       sig.color = case_when(
-<<<<<<< HEAD
         fdr < fdr_cutoff & logFC > fc_cutoff ~ col.up,
         fdr < fdr_cutoff & logFC < -fc_cutoff ~ col.down,
         TRUE ~ "gray75"
@@ -83,21 +66,10 @@ plot_volcano <- function(dge.res,
         TRUE ~ 0.65
       ),
       labels = case_when(
-        (gene_label_col %in% gene_labels) & (fdr < fdr_cutoff) ~ gene_label_col)
-=======
-        fdr < fdrCutoff & logFC > fcCutoff ~ col.up,
-        fdr < fdrCutoff & logFC < -fcCutoff ~ col.down,
-        TRUE ~ "gray75"
-      ),
-      sig.alpha = case_when(
-        fdr < fdrCutoff & logFC > fcCutoff ~ 1,
-        fdr < fdrCutoff & logFC < -fcCutoff ~ 1,
-        TRUE ~ 0.65
-      ),
-      labels = case_when(
-        (gene_label_col %in% gene_labels) & (fdr < fdrCutoff) ~ gene_label_col)
->>>>>>> 1ff33a9052914245c8faa43c8cae1f46f374e13d
-    )
+        (gene_label_col %in% gene_labels) & (fdr < fdr_cutoff) ~ gene_label_col
+        )
+      )
+
   
   # Generate plot
   p <- dge.res %>%
