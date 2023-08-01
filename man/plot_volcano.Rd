@@ -11,8 +11,13 @@ plot_volcano(
   gene_label_col = "hgnc_symbol",
   gene_labels = NULL,
   n_labels = 10,
+<<<<<<< HEAD
   fc_cutoff = 0.5,
   fdr_cutoff = 0.1,
+=======
+  fc_Cutoff = 0.5,
+  fdr_Cutoff = 0.1,
+>>>>>>> 1ff33a9052914245c8faa43c8cae1f46f374e13d
   plot_title = ""
 )
 }
@@ -29,9 +34,15 @@ plot_volcano(
 
 \item{n_labels}{Number of top genes to label (default 10)}
 
+<<<<<<< HEAD
 \item{fc_cutoff}{Fold change cutoff for significance (default 0.5)}
 
 \item{fdr_cutoff}{FDR cutoff for significance (default 0.1)}
+=======
+\item{fc_Cutoff}{Fold change cutoff for significance (default 0.5)}
+
+\item{fdr_Cutoff}{FDR cutoff for significance (default 0.1)}
+>>>>>>> 1ff33a9052914245c8faa43c8cae1f46f374e13d
 
 \item{plot_title}{Plot title text (default '')}
 }
