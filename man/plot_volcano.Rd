@@ -5,32 +5,35 @@
 \title{Generate volcano plot for differential expression results}
 \usage{
 plot_volcano(
-  deseq.res,
-  col.up = "red",
-  col.down = "blue",
-  gene.labels = NULL,
-  n.labels = 10,
-  fcCutoff = 0.5,
-  fdrCutoff = 0.1,
-  plot.title = ""
+  dge.res,
+  col_up = "red",
+  col_down = "blue",
+  gene_label_col = "hgnc_symbol",
+  gene_labels = NULL,
+  n_labels = 10,
+  fc_Cutoff = 0.5,
+  fdr_Cutoff = 0.1,
+  plot_title = ""
 )
 }
 \arguments{
-\item{deseq.res}{Tidy DE results table}
+\item{dge.res}{Tidy DE results table}
 
-\item{col.up}{Color for upregulated points (default 'red')}
+\item{col_up}{Color for upregulated points (default 'red')}
 
-\item{col.down}{Color for downregulated points (default 'blue')}
+\item{col_down}{Color for downregulated points (default 'blue')}
 
-\item{gene.labels}{Vector of gene labels to highlight (default NULL)}
+\item{gene_label_col}{Column with gene labels to highlight (default NULL)}
 
-\item{n.labels}{Number of top genes to label (default 10)}
+\item{gene_labels}{Vector of gene labels to highlight (default NULL)}
 
-\item{fcCutoff}{Fold change cutoff for significance (default 0.5)}
+\item{n_labels}{Number of top genes to label (default 10)}
 
-\item{fdrCutoff}{FDR cutoff for significance (default 0.1)}
+\item{fc_Cutoff}{Fold change cutoff for significance (default 0.5)}
 
-\item{plot.title}{Plot title text (default '')}
+\item{fdr_Cutoff}{FDR cutoff for significance (default 0.1)}
+
+\item{plot_title}{Plot title text (default '')}
 }
 \value{
 ggplot2 object with volcano plot

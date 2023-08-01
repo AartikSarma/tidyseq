@@ -7,8 +7,10 @@
 limma_to_dge(
   fit,
   var_interest,
+  var_level = NULL,
   numerator = NULL,
   denominator = NULL,
+  return_tidy = TRUE,
   save_output = NULL,
   output_filename = NULL
 )
@@ -18,22 +20,26 @@ limma_to_dge(
 
 \item{var_interest}{Variable of interest}
 
-\item{numerator}{Numerator level}
+\item{var_level}{Specific level of var_interest to extract}
 
-\item{denominator}{Denominator level}
+\item{numerator}{Numerator level for comparison}
 
-\item{save_output}{Logical to save output}
+\item{denominator}{Denominator level for comparison}
 
-\item{output_filename}{Custom filename for output}
+\item{return_tidy}{Logical to return tidy tibble (default TRUE)}
+
+\item{save_output}{Logical to save output file}
+
+\item{output_filename}{Custom output filename}
 }
 \value{
-Tibble with DE results
+DE results, tidy tibble or full table
 }
 \description{
 Extract differential expression results from limma model
 }
 \examples{
 fit <- rnaseq_to_limma(metadata, counts, design)
-results <- limma_to_dge(fit, "condition", 1, 0)
+results <- limma_to_dge(fit, "condition", "treated")
 
 }
