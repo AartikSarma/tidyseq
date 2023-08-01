@@ -7,8 +7,8 @@
 #' @param gene_label_col Column with gene labels to highlight (default NULL) 
 #' @param gene_labels Vector of gene labels to highlight (default NULL)  
 #' @param n_labels Number of top genes to label (default 10)
-#' @param fc_Cutoff Fold change cutoff for significance (default 0.5)
-#' @param fdr_Cutoff FDR cutoff for significance (default 0.1)
+#' @param fc_cutoff Fold change cutoff for significance (default 0.5)
+#' @param fdr_cutoff FDR cutoff for significance (default 0.1)
 #' @param plot_title Plot title text (default '')
 #'
 #' @return ggplot2 object with volcano plot
@@ -29,8 +29,8 @@ plot_volcano <- function(dge.res,
                          gene_label_col = "hgnc_symbol",
                          gene_labels = NULL,
                          n_labels = 10,
-                         fc_Cutoff = 0.5,
-                         fdr_Cutoff = 0.1,
+                         fc_cutoff = 0.5,
+                         fdr_cutoff = 0.1,
                          plot_title = "") {
   
   dge.res <- 
@@ -56,8 +56,8 @@ plot_volcano <- function(dge.res,
   dge.res <- dge.res %>%
     mutate(
       sig.color = case_when(
-        fdr < fdr_cutoff & logFC > fc_cutoff ~ col.up,
-        fdr < fdr_cutoff & logFC < -fc_cutoff ~ col.down,
+        fdr < fdr_cutoff & logFC > fc_cutoff ~ col_up,
+        fdr < fdr_cutoff & logFC < -fc_cutoff ~ col_down,
         TRUE ~ "gray75"
       ),
       sig.alpha = case_when(
@@ -92,7 +92,7 @@ plot_volcano <- function(dge.res,
     xlab("Log2 fold difference") +
     labs(x=expression(log[2]~fold~difference),  
          y=expression(-log[10]~p~value),
-         title = plot.title)
+         title = plot_title)
   
   return(p)
   
