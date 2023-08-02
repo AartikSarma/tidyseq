@@ -3,8 +3,9 @@
 #' Create a dot plot to compare GSEA results
 #'
 #' @param merged.gsea.results Data frame with merged GSEA results 
-#' @param padj_cutoff Significance cutoff for shape
-#' @param top_n_pathways Number of top pathways per analysis to include
+#' @param padj_cutoff Significance FDR cutoff (default 0.1)
+#' @param top_n_pathways Number of top pathways per analysis to include (default 15)
+#' @param minimum_significant_groups Number of groups with a significant result for included pathways (default 1 )
 #'
 #' @return ggplot object
 #'
@@ -17,26 +18,28 @@
 #' @importFrom stringr str_wrap  
 #' @export
 
-plot_merged_gsea_results <- function(merged.gsea.results,
+plot_merged_gsea_results <- function(merged_long_gsea_results,
                                      padj_cutoff = 0.1,
-                                     top_n_pathways = 15) {
+                                     top_n_pathways = 15, 
+                                     minimum_significant_groups = 1) {
   
   # Process results
-  processed <- merged.gsea.results %>%
+  processed <- merged_long_gsea_results %>%
     mutate(is_sig = padj < padj_cutoff) %>% # significance
     filter(!is.na(NES)) %>% # remove NA
-    group_by(gsea_result_name, sign(NES)) %>% # group
+    group_by(result_name, sign(NES)) %>% # group
     arrange(-abs(NES)) %>% # sort
     mutate(include_pathway = row_number() <= top_n_pathways) %>% # top n 
     ungroup %>% 
     filter(sum(include_pathway) >= 1, .by = pathway) %>% # keep if top in any
-    mutate(NES_prod = prod(NES, na.rm=FALSE), .by="pathway") %>% # NES direction
+    mutate(NES_prod = prod(NES, na.rm=TRUE), .by="pathway") %>% # NES direction
     clean_msigdbr_pathway_names() %>% # clean names
-    mutate(pathway = str_wrap(pathway, 40)) # wrap names
-  
+    mutate(pathway = str_wrap(pathway, 40)) %>%  # wrap names
+    filter(sum(is_sig) >= minimum_significant_groups, .by = "pathway") %>%
+    mutate(n_sig_groups = sum(is_sig), .by = "pathway")
   # Generate plot
   plot <- processed %>%
-    ggplot(aes(x = gsea_result_name, y = reorder(pathway, NES_prod), 
+    ggplot(aes(x = result_name, y = reorder(pathway, -n_sig_groups), 
                color = NES)) +
     geom_point(aes(shape = is_sig, size = abs(NES))) +
     scale_color_gradient2(high = "red", low = "blue") + 

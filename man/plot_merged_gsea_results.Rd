@@ -5,17 +5,20 @@
 \title{Visualize merged GSEA results}
 \usage{
 plot_merged_gsea_results(
-  merged.gsea.results,
+  merged_long_gsea_results,
   padj_cutoff = 0.1,
-  top_n_pathways = 15
+  top_n_pathways = 15,
+  minimum_significant_groups = 1
 )
 }
 \arguments{
+\item{padj_cutoff}{Significance FDR cutoff (default 0.1)}
+
+\item{top_n_pathways}{Number of top pathways per analysis to include (default 15)}
+
+\item{minimum_significant_groups}{Number of groups with a significant result for included pathways (default 1 )}
+
 \item{merged.gsea.results}{Data frame with merged GSEA results}
-
-\item{padj_cutoff}{Significance cutoff for shape}
-
-\item{top_n_pathways}{Number of top pathways per analysis to include}
 }
 \value{
 ggplot object

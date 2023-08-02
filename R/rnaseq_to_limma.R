@@ -21,12 +21,14 @@
 
 rnaseq_to_limma <- function(metadata, counts, design) {
   
+  validate_data(metadata, counts)
+  
   # Create design matrix
   mm <- model.matrix(design, metadata)
   
   # Create DGEList object
-  dge <- DGEList(counts[,2:ncol(counts)], # count data
-                 genes = counts[,1], # gene ids
+  dge <- DGEList(counts, # count data
+                 genes = rownames(counts), # gene ids
                  samples = metadata) # sample data
   
   # Normalize 

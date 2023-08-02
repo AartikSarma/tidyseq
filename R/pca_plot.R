@@ -29,13 +29,7 @@ pca_plot <- function(metadata, counts, annotation = NULL) {
   }
   
   # Transform counts
-  vst_counts <- counts %>%
-    column_to_rownames("gene_id") %>% 
-    t() %>%
-    as.matrix() %>%
-    vst() %>%
-    t() %>%
-    as_tibble()
+  v <- voom(counts)$E
   
   # Run PCA
   pca_data <- prcomp(t(scale(t(vst_counts[,2:ncol(vst_counts)]))),

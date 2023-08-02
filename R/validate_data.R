@@ -1,47 +1,49 @@
-#' Validate metadata and gene expression data
+#' Validate metadata and expression data
 #'
-#' Confirm metadata and gene expression data formats are compatible for analysis
+#' Check that metadata and expression formats are compatible
 #'
-#' @param metadata Tibble with sample metadata 
-#' @param gene_expression Tibble with gene expression data
-#' @param sample_name Name of sample ID column in metadata (default 'sampleid')
-#' @param gene_id Name of gene ID column in expression (default 'ensembl_gene_id')
-#' 
-#' @return TRUE if validation passed, FALSE otherwise
+#' @param metadata Metadata table
+#' @param expression Gene expression data
+#'
+#' @return NULL if validation passes, stops with error otherwise  
 #'
 #' @examples
-#' metadata <- tibble(sampleid = c("s1", "s2", "s3"))
-#' expression <- tibble(ensembl_gene_id = c("ENSG1", "ENSG2"),
-#'                       s1 = c(1,2),
-#'                       s2 = c(2,1), 
-#'                       s3 = c(3,5))
-#' validate_data(metadata, expression) # Returns TRUE
-#' 
+#' metadata <- readRDS("metadata.rds")
+#' expression <- readRDS("expression.rds")
+#' validate_data(metadata, expression)
+#'
 #' @export
-validate_data <- function(metadata, gene_expression, 
-                          sample_name = "sampleid",
-                          gene_id = "ensembl_gene_id") {
+
+validate_data <- function(metadata, expression) {
   
-  # Check columns
-  meta_samples <- unique(metadata[[sample_name]])
-  exp_samples <- colnames(gene_expression)[-1]
+  # Check expression data is numeric
+  if(!all(sapply(expression, is.numeric))) {
+    stop("Expression data contains non-numeric columns")
+  }
   
+  # Check expression has rownames
+  if(is.null(rownames(expression))) {
+    stop("Expression data must have rownames that are gene identifiers")
+  }
+  
+  # Check metadata colnames match expression colnames
+  meta_samples <- rownames(metadata)
+  exp_samples <- colnames(expression)
+  if(!all(exp_samples %in% meta_samples)) {
+    stop("Expression column names not in metadata row names") 
+  }
+  
+  # Check metadata rownames match expression colnames
   if(!all(meta_samples %in% exp_samples)) {
-    return(FALSE)
+    stop("Metadata row names not in expression column names")
   }
   
-  if(nrow(metadata) != length(exp_samples)-1) {
-    return(FALSE) 
+  # Check equal
+  if(!identical(meta_samples, exp_samples)) {
+    stop("Metadata and expression samples not identical")
   }
   
-  if(!is.character(gene_expression[[1]])) {
-    return(FALSE)
-  } 
-  
-  if(sum(sapply(gene_expression[,2:ncol(gene_expression)], is.numeric)) != ncol(gene_expression)-1) {
-    return(FALSE)
-  }
-  
-  return(TRUE)
+  # If reach here, valid
+  return(NULL)
   
 }

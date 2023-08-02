@@ -99,6 +99,7 @@ limma_to_dge <- function(fit,
   
   if(return_tidy){
     results <- results %>% 
+      rownames_to_column("gene_id") %>%
       dplyr::select(gene_id, logFC,pvalue =  P.Value, fdr = adj.P.Val) 
   }
   

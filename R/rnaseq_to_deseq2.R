@@ -23,8 +23,10 @@
 
 rnaseq_to_deseq2 <- function(metadata, counts, design) {
   
+  validate_data(metadata, counts)
+  
   # Create DESeqDataSet
-  dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts %>% column_to_rownames("gene_id"),
+  dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts,
                                 colData = metadata,
                                 design = as.formula(design))
   

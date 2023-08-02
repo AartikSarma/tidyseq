@@ -15,23 +15,15 @@
 #' design <- ~ type
 #' limma_model <- microarray_to_limma(metadata, expression, design)
 #' 
-#' @importFrom limma normalizeBetweenArrays lmFit eBayes
+#' @importFrom limma lmFit eBayes
 #' @export
 
 microarray_to_limma <- function(metadata, expression, design) {
+  validate_data(metadata, expression)
   
-  # Normalize expression
-  expression <- normalizeBetweenArrays(expression)
-  
-  # Create ExpresionSet
-  eset <- ExpressionSet(assayData = expression)
-  
-  # Linear model fit
-  design <- model.matrix(design, data = metadata)
-  fit <- lmFit(eset, design)
-  
-  # Empirical Bayes statistics
-  fit <- eBayes(fit)
+  mm <- model.matrix(design, data = metadata)
+  fit <- lmFit(expression, mm)
+  fit <- eBayes(fit, robust = TRUE)
   
   return(fit)
   

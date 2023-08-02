@@ -2,36 +2,24 @@
 % Please edit documentation in R/validate_data.R
 \name{validate_data}
 \alias{validate_data}
-\title{Validate metadata and gene expression data}
+\title{Validate metadata and expression data}
 \usage{
-validate_data(
-  metadata,
-  gene_expression,
-  sample_name = "sampleid",
-  gene_id = "ensembl_gene_id"
-)
+validate_data(metadata, expression)
 }
 \arguments{
-\item{metadata}{Tibble with sample metadata}
+\item{metadata}{Metadata table}
 
-\item{gene_expression}{Tibble with gene expression data}
-
-\item{sample_name}{Name of sample ID column in metadata (default 'sampleid')}
-
-\item{gene_id}{Name of gene ID column in expression (default 'ensembl_gene_id')}
+\item{expression}{Gene expression data}
 }
 \value{
-TRUE if validation passed, FALSE otherwise
+NULL if validation passes, stops with error otherwise
 }
 \description{
-Confirm metadata and gene expression data formats are compatible for analysis
+Check that metadata and expression formats are compatible
 }
 \examples{
-metadata <- tibble(sampleid = c("s1", "s2", "s3"))
-expression <- tibble(ensembl_gene_id = c("ENSG1", "ENSG2"),
-                      s1 = c(1,2),
-                      s2 = c(2,1), 
-                      s3 = c(3,5))
-validate_data(metadata, expression) # Returns TRUE
+metadata <- readRDS("metadata.rds")
+expression <- readRDS("expression.rds")
+validate_data(metadata, expression)
 
 }

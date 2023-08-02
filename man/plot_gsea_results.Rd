@@ -4,7 +4,12 @@
 \alias{plot_gsea_results}
 \title{Visualize GSEA results}
 \usage{
-plot_gsea_results(gsea.res, top_n_pathways = 10, padj_cutoff = 0.1)
+plot_gsea_results(
+  gsea.res,
+  top_n_pathways = 10,
+  padj_cutoff = 0.1,
+  remove_first_word_in_pathway_name = T
+)
 }
 \arguments{
 \item{gsea.res}{Data frame of GSEA results}
@@ -12,6 +17,8 @@ plot_gsea_results(gsea.res, top_n_pathways = 10, padj_cutoff = 0.1)
 \item{top_n_pathways}{Number of up/downregulated pathways to include (default 10)}
 
 \item{padj_cutoff}{Significance cutoff for shape (default 0.1)}
+
+\item{remove_first_word_in_pathway_name}{Remove first word in pathway name (default TRUE)}
 }
 \value{
 ggplot object
