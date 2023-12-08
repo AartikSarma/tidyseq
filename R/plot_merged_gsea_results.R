@@ -21,7 +21,9 @@
 plot_merged_gsea_results <- function(merged_long_gsea_results,
                                      padj_cutoff = 0.1,
                                      top_n_pathways = 15, 
-                                     minimum_significant_groups = 1) {
+                                     minimum_significant_groups = 1,
+                                     str_wrap_legnth = 40,
+                                     str_trunc_length = 1000) {
   
   # Process results
   processed <- merged_long_gsea_results %>%
@@ -34,19 +36,20 @@ plot_merged_gsea_results <- function(merged_long_gsea_results,
     filter(sum(include_pathway) >= 1, .by = pathway) %>% # keep if top in any
     mutate(NES_prod = prod(NES, na.rm=TRUE), .by="pathway") %>% # NES direction
     clean_msigdbr_pathway_names() %>% # clean names
-    mutate(pathway = str_wrap(pathway, 40)) %>%  # wrap names
+    mutate(pathway = str_wrap(pathway, str_wrap_legnth) %>% str_trunc(str_trunc_length)) %>%  # wrap names
     filter(sum(is_sig) >= minimum_significant_groups, .by = "pathway") %>%
-    mutate(n_sig_groups = sum(is_sig), .by = "pathway")
+    mutate(n_sig_groups = sum(is_sig),
+           pathway_sum = sum(NES), .by = "pathway")
   # Generate plot
   plot <- processed %>%
-    ggplot(aes(x = result_name, y = reorder(pathway, -n_sig_groups), 
+    ggplot(aes(x = result_name, y = reorder(pathway, n_sig_groups), 
                color = NES)) +
     geom_point(aes(shape = is_sig, size = abs(NES))) +
     scale_color_gradient2(high = "red", low = "blue") + 
     scale_size(range = c(2,5)) +
     scale_shape_manual(values = c("TRUE"=16, "FALSE"=21)) +
     theme_classic() +
-    theme(aspect.ratio = 4,
+    theme(
           panel.border = element_rect(fill=NA, linewidth=2),
           axis.line = element_blank(),
           axis.text.x = element_text(angle=45, hjust=1, vjust=1)) +

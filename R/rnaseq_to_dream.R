@@ -1,10 +1,11 @@
-#' Differential expression analysis with limma-voom  
+#' Differential expression analysis with Dream
 #'
-#' Perform differential expression analysis on RNA-seq count data using limma-voom
+#' Perform differential expression analysis with mixed effects models on RNA-seq count data using Dream
 #'
 #' @param metadata Metadata table
 #' @param counts Count data table
 #' @param design Model design formula
+#' @param ddf Method to estimate degrees of freedom
 #' 
 #' @return Limma model fit object
 #'
@@ -12,17 +13,21 @@
 #' metadata <- readRDS("metadata.rds")
 #' counts <- readRDS("counts.rds")
 #' design <- ~ condition + batch
-#' model <- rnaseq_to_limma(metadata, counts, design)
+#' model <- rnaseq_to_dream(metadata, counts, design)
 #' 
 #' @importFrom edgeR DGEList filterByExpr calcNormFactors voomLmFit
 #' @importFrom limma  voom lmFit eBayes  
+#' @importFrom variancePartition voomWithDreamWeights dream
 #' @importFrom dplyr filter
 #' @export
 
-rnaseq_to_limma <- function(metadata, counts, design,
+rnaseq_to_dream <- function(metadata, counts, design,
+                            ddf = "Kenward-Roger",
                             filter_low_counts = TRUE) {
   
   validate_data(metadata, counts)
+  
+  param = SnowParam(6, "SOCK", progressbar=TRUE)
   
   # Create design matrix
   mm <- model.matrix(design, metadata)
@@ -38,21 +43,20 @@ rnaseq_to_limma <- function(metadata, counts, design,
   # Filter low counts
   keep <- filterByExpr(dge, design = mm)
   
+  v <- voomWithDreamWeights(counts = dge,
+                            formula = design,
+                            data = metadata,
+                            BPPARAM = param)
   #voomLmFit
-  fit <- voomLmFit(
-    counts = dge[keep,], 
-    design = mm 
+  fit <- dream(v,
+               formula = design,
+               data = metadata, 
+               BPPARAM = param,
+               ddf = ddf
   ) %>% eBayes(robust = T)
-   
-  # # Voom transformation
-  # v <- voom(dge[keep,], plot = FALSE) 
-  # 
-  # # Fit linear model
-  # fit <- lmFit(v, mm)
-  # 
-  # # Empirical Bayes statistics
-  # fit <- eBayes(fit, robust=TRUE)
-  # 
+  
   return(fit)
   
 }
+
+??dream

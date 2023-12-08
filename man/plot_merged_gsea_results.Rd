@@ -8,7 +8,9 @@ plot_merged_gsea_results(
   merged_long_gsea_results,
   padj_cutoff = 0.1,
   top_n_pathways = 15,
-  minimum_significant_groups = 1
+  minimum_significant_groups = 1,
+  str_wrap_legnth = 40,
+  str_trunc_length = 1000
 )
 }
 \arguments{
