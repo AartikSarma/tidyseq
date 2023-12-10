@@ -43,10 +43,13 @@ rnaseq_to_dream <- function(metadata, counts, design,
   # Filter low counts
   keep <- filterByExpr(dge, design = mm)
   
+  dge <- dge[keep, ]
+  
   v <- voomWithDreamWeights(counts = dge,
                             formula = design,
                             data = metadata,
-                            BPPARAM = param)
+                            BPPARAM = param,
+                            plot = T)
   #voomLmFit
   fit <- dream(v,
                formula = design,
@@ -58,5 +61,3 @@ rnaseq_to_dream <- function(metadata, counts, design,
   return(fit)
   
 }
-
-??dream
