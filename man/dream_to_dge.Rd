@@ -4,7 +4,7 @@
 \alias{dream_to_dge}
 \title{Convert Dream results to tidy table}
 \usage{
-dream_to_dge(dream_model, contrast)
+dream_to_dge(dream_model, coef)
 }
 \arguments{
 \item{dream_model}{Fitted Dream model object}
@@ -16,17 +16,4 @@ Tidy tibble with DE results
 }
 \description{
 Convert Dream results to tidy table
-}
-\examples{
-library(variancePartition)
-metadata <- tibble(sample = c("s1","s2","s3"),
-                   type = c("treated","untreated","treated"))
-counts <- tibble(gene_id = c("ENSG1", "ENSG2"),  
-                 s1 = c(10, 20),
-                 s2 = c(15, 50),
-                 s3 = c(20, 100))
-design <- model.matrix(~ type, metadata)
-dream_model <- dream(counts[,2:3], design)
-results <- dream_to_dge(dream_model, contrast = c(-1,1))
-
 }

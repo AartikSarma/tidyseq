@@ -20,39 +20,34 @@
 #' @export
 
 rnaseq_to_limma <- function(metadata, counts, design,
-                            filter_low_counts = TRUE) {
+                            filterByExpr.design = ~1) {
   
   validate_data(metadata, counts)
   
   # Create design matrix
   mm <- model.matrix(design, metadata)
+  mm.filter <- model.matrix(filterByExpr.design, metadata)
   
   # Create DGEList object
   dge <- DGEList(counts, # count data
                  genes = rownames(counts), # gene ids
-                 samples = metadata) # sample data
+                 samples = metadata, # sample data
+                 remove.zeros = T)
   
   # Normalize 
   dge <- calcNormFactors(dge)
   
   # Filter low counts
-  keep <- filterByExpr(dge, design = mm)
+  keep <- filterByExpr(dge, design = mm.filter)
   
   #voomLmFit
   fit <- voomLmFit(
     counts = dge[keep,], 
-    design = mm 
+    design = mm, 
+    plot = T
   ) %>% eBayes(robust = T)
    
-  # # Voom transformation
-  # v <- voom(dge[keep,], plot = FALSE) 
-  # 
-  # # Fit linear model
-  # fit <- lmFit(v, mm)
-  # 
-  # # Empirical Bayes statistics
-  # fit <- eBayes(fit, robust=TRUE)
-  # 
+
   return(fit)
   
 }

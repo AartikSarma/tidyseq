@@ -8,8 +8,8 @@ rnaseq_to_dream(
   metadata,
   counts,
   design,
-  ddf = "Kenward-Roger",
-  filter_low_counts = TRUE
+  filterByExpr.design = ~1,
+  ddf = "Kenward-Roger"
 )
 }
 \arguments{

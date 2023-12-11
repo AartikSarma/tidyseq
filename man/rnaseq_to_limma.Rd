@@ -4,7 +4,7 @@
 \alias{rnaseq_to_limma}
 \title{Differential expression analysis with limma-voom}
 \usage{
-rnaseq_to_limma(metadata, counts, design, filter_low_counts = TRUE)
+rnaseq_to_limma(metadata, counts, design, filterByExpr.design = ~1)
 }
 \arguments{
 \item{metadata}{Metadata table}

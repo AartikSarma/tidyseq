@@ -5,33 +5,16 @@
 #'
 #' @return Tidy tibble with DE results 
 #'
-#' @examples
-#' library(variancePartition)
-#' metadata <- tibble(sample = c("s1","s2","s3"),
-#'                    type = c("treated","untreated","treated"))
-#' counts <- tibble(gene_id = c("ENSG1", "ENSG2"),  
-#'                  s1 = c(10, 20),
-#'                  s2 = c(15, 50),
-#'                  s3 = c(20, 100))
-#' design <- model.matrix(~ type, metadata)
-#' dream_model <- dream(counts[,2:3], design)
-#' results <- dream_to_dge(dream_model, contrast = c(-1,1))
-#'
-#' @importFrom limma topTable
-#' @importFrom tibble rownames_to_column 
+#' @importFrom dplyr rename 
 #' @export
 
-dream_to_dge <- function(dream_model, contrast) {
+dream_to_dge <- function(dream_model, coef) {
   
-  fit <- contrasts.fit(dream_model, contrast)
-  results <- topTable(fit)
-  
-  results <- results %>%
-    rownames_to_column("gene_id") %>%
-    select(gene_id, logFC, P.Value, adj.P.Val) %>%
-    rename(logFC = logFC, 
-           pvalue = P.Value,
-           fdr = adj.P.Val)
+  results <- variancePartition::topTable(dream_model ,coef = coef, number = Inf) %>% 
+    dplyr::select(gene_id = genes, 
+                  logFC = logFC, 
+                  pvalue = P.Value,
+                  fdr = adj.P.Val)
   
   return(results)
   
