@@ -20,7 +20,7 @@ ensembl_to_hgnc <- function(results) {
   }
   
   # Load mapping
-  ensembl_map <- system.file("data", "ensembl_to_symbol.Rds", package = "baton", mustWork = T) %>%
+  ensembl_map <- system.file("data", "ensembl_to_symbol.Rds", package = "tidyseq", mustWork = T) %>%
     readRDS()
   
   # Convert IDs
