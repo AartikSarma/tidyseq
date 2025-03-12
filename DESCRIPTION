@@ -1,0 +1,34 @@
+Package: tidyrna
+Title: User-Friendly RNA-Seq Analysis for Researchers with Limited Programming Experience
+Version: 0.1.0
+Authors@R: 
+    person("Your", "Name", email = "your.email@example.com", role = c("aut", "cre"))
+Description: TidyRNA simplifies RNA-Seq analysis for researchers with limited 
+    programming experience. It provides a streamlined workflow for data import, 
+    quality control, normalization, differential expression analysis, pathway 
+    enrichment, and visualization with robust error handling and guidance.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports:
+    dplyr,
+    tidyr,
+    ggplot2,
+    purrr,
+    readr,
+    tibble,
+    DESeq2,
+    edgeR,
+    limma,
+    clusterProfiler,
+    rmarkdown,
+    knitr,
+    DT,
+    plotly
+Suggests:
+    testthat (>= 3.0.0),
+    GSVA,
+    CEMiTool
+Config/testthat/edition: 3
+VignetteBuilder: knitr

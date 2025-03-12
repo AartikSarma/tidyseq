@@ -1,0 +1,303 @@
+---
+title: "Getting Started with TidyRNA"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with TidyRNA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Introduction
+
+TidyRNA is designed to make RNA-Seq analysis accessible to researchers with limited programming experience. This vignette demonstrates how to perform a complete RNA-Seq analysis workflow from data import to visualization and reporting.
+
+## Installation
+
+You can install TidyRNA from GitHub:
+
+```{r installation}
+# Install devtools if not already installed
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+
+# Install TidyRNA from GitHub
+devtools::install_github("yourusername/tidyrna")
+
+# Load the package
+library(tidyrna)
+```
+
+## Data Preparation
+
+Before starting your analysis, you need two primary input files:
+
+1. **Count data file**: A matrix of read counts with genes as rows and samples as columns
+2. **Metadata file**: A table with sample information, including experimental conditions
+
+These can be in CSV, TSV, or TXT format, or you can provide them as R data frames.
+
+## Basic Workflow
+
+The quickest way to run a complete analysis is with the `run_rnaseq_workflow()` function:
+
+```{r basic_workflow}
+# Run complete workflow with default parameters
+results <- run_rnaseq_workflow(
+  counts_file = "counts.csv",
+  metadata_file = "metadata.csv",
+  condition_column = "treatment",
+  output_dir = "results"
+)
+
+# Print results summary
+print(results)
+```
+
+This will:
+1. Import and validate your data
+2. Filter low-count genes
+3. Normalize counts
+4. Perform differential expression analysis
+5. Conduct functional enrichment analysis
+6. Generate comprehensive HTML reports
+
+## Step-by-Step Analysis
+
+Alternatively, you can run each step individually for more control:
+
+### 1. Import Data
+
+```{r import_data}
+# Create a new TidyRNA object
+rnaseq <- tidyrna()
+
+# Import count data and metadata
+rnaseq <- import_data(
+  rnaseq,
+  counts_file = "counts.csv",
+  metadata_file = "metadata.csv"
+)
+```
+
+### 2. Filter Low-Count Genes
+
+```{r filter_data}
+# Filter out low-count genes
+rnaseq <- filter_low_counts(
+  rnaseq,
+  min_count = 10,
+  min_samples = 2,
+  count_type = "raw"
+)
+```
+
+### 3. Normalize Count Data
+
+```{r normalize_data}
+# Normalize counts using DESeq2
+rnaseq <- normalize_counts(
+  rnaseq,
+  method = "DESeq2",
+  use_filtered = TRUE
+)
+```
+
+### 4. Explore Data with PCA
+
+```{r pca_plot}
+# Create PCA plot
+pca_plot <- plot_pca(
+  rnaseq,
+  color_by = "treatment",
+  interactive = TRUE
+)
+
+# Display plot
+print(pca_plot)
+```
+
+### 5. Differential Expression Analysis
+
+```{r de_analysis}
+# Create contrasts for DE analysis
+rnaseq <- create_de_contrasts(
+  rnaseq,
+  condition_column = "treatment",
+  reference_level = "control"
+)
+
+# Run differential expression analysis
+rnaseq <- run_de_analysis(
+  rnaseq,
+  method = "DESeq2",
+  alpha = 0.05
+)
+```
+
+### 6. Visualize DE Results
+
+```{r de_plots}
+# Create volcano plot
+volcano_plot <- plot_volcano(
+  rnaseq,
+  contrast = "treatment_treated_vs_control",
+  p_cutoff = 0.05,
+  lfc_cutoff = 1,
+  interactive = TRUE
+)
+
+# Create MA plot
+ma_plot <- plot_ma(
+  rnaseq,
+  contrast = "treatment_treated_vs_control",
+  interactive = TRUE
+)
+
+# Create heatmap of top DE genes
+heatmap_plot <- plot_de_heatmap(
+  rnaseq,
+  contrast = "treatment_treated_vs_control",
+  n_genes = 50,
+  annotation_cols = c("treatment", "batch")
+)
+```
+
+### 7. Functional Enrichment Analysis
+
+```{r enrichment_analysis}
+# Run GO enrichment analysis
+rnaseq <- run_go_enrichment(
+  rnaseq,
+  organism = "hsa",
+  gene_id_type = "ENSEMBL"
+)
+
+# Run KEGG pathway enrichment
+rnaseq <- run_kegg_enrichment(
+  rnaseq,
+  organism = "hsa",
+  gene_id_type = "ENSEMBL"
+)
+
+# Run GSEA
+rnaseq <- run_gsea(
+  rnaseq,
+  gene_sets = "GO",
+  organism = "hsa",
+  gene_id_type = "ENSEMBL"
+)
+```
+
+### 8. Visualize Enrichment Results
+
+```{r enrichment_plots}
+# Create enrichment dotplot for GO results
+go_dotplot <- plot_enrichment_dotplot(
+  rnaseq,
+  result_name = "treatment_treated_vs_control_go",
+  n_terms = 20,
+  interactive = TRUE
+)
+
+# Create enrichment dotplot for KEGG results
+kegg_dotplot <- plot_enrichment_dotplot(
+  rnaseq,
+  result_name = "treatment_treated_vs_control_kegg",
+  n_terms = 20,
+  interactive = TRUE
+)
+```
+
+### 9. Generate Reports
+
+```{r generate_reports}
+# Create QC report
+rnaseq <- create_qc_report(
+  rnaseq,
+  output_dir = "results"
+)
+
+# Create DE report
+rnaseq <- create_de_report(
+  rnaseq,
+  output_dir = "results"
+)
+
+# Create enrichment report
+rnaseq <- create_enrichment_report(
+  rnaseq,
+  output_dir = "results"
+)
+
+# Create comprehensive report
+rnaseq <- create_full_report(
+  rnaseq,
+  output_dir = "results"
+)
+```
+
+### 10. Save Analysis Results
+
+```{r save_results}
+# Save TidyRNA object for later use
+save_analysis(rnaseq, "results/tidyrna_results.rds")
+
+# Load saved results
+reloaded_rnaseq <- load_analysis("results/tidyrna_results.rds")
+```
+
+## Customizing Parameters
+
+TidyRNA provides sensible defaults for all parameters, but you can customize each step according to your needs.
+
+Here's an example of a more customized workflow:
+
+```{r customized_workflow}
+# Run a customized workflow
+custom_results <- run_rnaseq_workflow(
+  counts_file = "counts.csv",
+  metadata_file = "metadata.csv",
+  condition_column = "treatment",
+  reference_level = "control",
+  output_dir = "custom_results",
+  filter_params = list(
+    min_count = 5,
+    min_samples = 3,
+    count_type = "cpm"
+  ),
+  norm_params = list(
+    method = "TMM"
+  ),
+  de_params = list(
+    method = "limma-voom",
+    alpha = 0.1,
+    lfc_threshold = 0.5
+  ),
+  enrich_params = list(
+    organism = "mmu",
+    gene_id_type = "SYMBOL",
+    p_cutoff = 0.01,
+    p_adj_cutoff = 0.05,
+    run_go = TRUE,
+    run_kegg = TRUE,
+    run_gsea = FALSE
+  )
+)
+```
+
+## Conclusion
+
+TidyRNA simplifies RNA-Seq analysis for researchers with limited programming experience while maintaining analytical rigor. By providing informative error messages, extensive validation, and intuitive visualizations, the package reduces technical barriers to RNA-Seq analysis while ensuring reproducibility.
+
+For more information, please refer to the function documentation and additional vignettes.
