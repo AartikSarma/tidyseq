@@ -2,29 +2,29 @@
 #'
 #' @description Create contrast specifications from conditions or manually specified contrasts
 #'
-#' @param tidyrna_object A tidyrna object with metadata
+#' @param tidyseq_object A tidyseq object with metadata
 #' @param condition_column Column in metadata containing condition information
 #' @param reference_level Reference level for condition comparisons
 #' @param contrasts List of manual contrasts as character vectors ("Group1-Group2")
 #' @param coef Coefficient numbers/names from design matrix to test (instead of contrasts)
 #' @param design_formula Design formula for the model (default: ~ condition)
 #'
-#' @return A tidyrna object with contrast specifications
+#' @return A tidyseq object with contrast specifications
 #'
 #' @export
-create_de_contrasts <- function(tidyrna_object,
+create_de_contrasts <- function(tidyseq_object,
                                  condition_column = NULL,
                                  reference_level = NULL,
                                  contrasts = NULL,
                                  coef = NULL,
                                  design_formula = NULL) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
-  if (is.null(tidyrna_object$metadata)) {
-    stop("No metadata found in tidyrna object. Run import_data() first.")
+  if (is.null(tidyseq_object$metadata)) {
+    stop("No metadata found in tidyseq object. Run import_data() first.")
   }
   
   # Initialize contrasts list
@@ -37,19 +37,19 @@ create_de_contrasts <- function(tidyrna_object,
   
   # Case 1: Use condition column and reference level
   if (!is.null(condition_column)) {
-    tidyrna_object <- add_message(
-      tidyrna_object, 
+    tidyseq_object <- add_message(
+      tidyseq_object, 
       paste0("Creating contrasts from condition column: ", condition_column),
       "log"
     )
     
     # Check if condition column exists
-    if (!condition_column %in% colnames(tidyrna_object$metadata)) {
+    if (!condition_column %in% colnames(tidyseq_object$metadata)) {
       stop("Condition column '", condition_column, "' not found in metadata")
     }
     
     # Get condition levels
-    conditions <- as.factor(tidyrna_object$metadata[[condition_column]])
+    conditions <- as.factor(tidyseq_object$metadata[[condition_column]])
     levels <- levels(conditions)
     
     # Set reference level if specified
@@ -73,7 +73,7 @@ create_de_contrasts <- function(tidyrna_object,
     }
     
     # Store design formula and condition information
-    tidyrna_object$parameters$de_design <- list(
+    tidyseq_object$parameters$de_design <- list(
       formula = design_formula,
       condition_column = condition_column,
       reference_level = reference_level,
@@ -85,8 +85,8 @@ create_de_contrasts <- function(tidyrna_object,
   
   # Case 2: Use manually specified contrasts
   else if (!is.null(contrasts)) {
-    tidyrna_object <- add_message(
-      tidyrna_object, 
+    tidyseq_object <- add_message(
+      tidyseq_object, 
       "Using manually specified contrasts",
       "log"
     )
@@ -96,36 +96,36 @@ create_de_contrasts <- function(tidyrna_object,
   
   # Case 3: Use coefficients
   else if (!is.null(coef)) {
-    tidyrna_object <- add_message(
-      tidyrna_object, 
+    tidyseq_object <- add_message(
+      tidyseq_object, 
       "Using specified coefficients for DE analysis",
       "log"
     )
     
     # Store coefficient information
-    tidyrna_object$parameters$de_design <- list(
+    tidyseq_object$parameters$de_design <- list(
       formula = design_formula,
       coef = coef
     )
   }
   
   # Store contrasts in object
-  tidyrna_object$parameters$contrasts <- contrast_list
+  tidyseq_object$parameters$contrasts <- contrast_list
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Created ", length(contrast_list), " contrast specifications"),
     "log"
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Run differential expression analysis
 #'
 #' @description Perform differential expression analysis using DESeq2 or limma
 #'
-#' @param tidyrna_object A tidyrna object with count data and metadata
+#' @param tidyseq_object A tidyseq object with count data and metadata
 #' @param method Analysis method. One of "DESeq2", "limma-voom", or "edgeR" (default: "DESeq2")
 #' @param design_formula Design formula (default: from create_de_contrasts)
 #' @param contrasts List of contrasts to test (default: from create_de_contrasts)
@@ -135,10 +135,10 @@ create_de_contrasts <- function(tidyrna_object,
 #' @param use_filtered Whether to use filtered counts (default: TRUE)
 #' @param use_normalized Whether to use pre-computed normalized counts (default: TRUE)
 #'
-#' @return A tidyrna object with DE results
+#' @return A tidyseq object with DE results
 #'
 #' @export
-run_de_analysis <- function(tidyrna_object,
+run_de_analysis <- function(tidyseq_object,
                              method = "DESeq2",
                              design_formula = NULL,
                              contrasts = NULL,
@@ -148,21 +148,21 @@ run_de_analysis <- function(tidyrna_object,
                              use_filtered = TRUE,
                              use_normalized = TRUE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Get design information
-  if (is.null(design_formula) && !is.null(tidyrna_object$parameters$de_design)) {
-    design_formula <- tidyrna_object$parameters$de_design$formula
+  if (is.null(design_formula) && !is.null(tidyseq_object$parameters$de_design)) {
+    design_formula <- tidyseq_object$parameters$de_design$formula
   }
   
-  if (is.null(contrasts) && !is.null(tidyrna_object$parameters$contrasts)) {
-    contrasts <- tidyrna_object$parameters$contrasts
+  if (is.null(contrasts) && !is.null(tidyseq_object$parameters$contrasts)) {
+    contrasts <- tidyseq_object$parameters$contrasts
   }
   
-  if (is.null(coef) && !is.null(tidyrna_object$parameters$de_design$coef)) {
-    coef <- tidyrna_object$parameters$de_design$coef
+  if (is.null(coef) && !is.null(tidyseq_object$parameters$de_design$coef)) {
+    coef <- tidyseq_object$parameters$de_design$coef
   }
   
   # Check if we have design information
@@ -171,23 +171,23 @@ run_de_analysis <- function(tidyrna_object,
   }
   
   # Check if we have counts
-  if (use_filtered && is.null(tidyrna_object$filtered_counts)) {
+  if (use_filtered && is.null(tidyseq_object$filtered_counts)) {
     stop("No filtered counts found. Run filter_low_counts() first.")
   }
   
-  if (!use_filtered && is.null(tidyrna_object$raw_counts)) {
+  if (!use_filtered && is.null(tidyseq_object$raw_counts)) {
     stop("No raw counts found. Run import_data() first.")
   }
   
   # Get appropriate count data
-  counts <- if (use_filtered) tidyrna_object$filtered_counts else tidyrna_object$raw_counts
+  counts <- if (use_filtered) tidyseq_object$filtered_counts else tidyseq_object$raw_counts
   
   # Get metadata
-  if (is.null(tidyrna_object$metadata)) {
+  if (is.null(tidyseq_object$metadata)) {
     stop("No metadata found. Run import_data() first.")
   }
   
-  metadata <- tidyrna_object$metadata
+  metadata <- tidyseq_object$metadata
   
   # Ensure samples match
   common_samples <- intersect(colnames(counts), rownames(metadata))
@@ -200,18 +200,18 @@ run_de_analysis <- function(tidyrna_object,
   
   # Run DE analysis based on method
   if (method == "DESeq2") {
-    tidyrna_object <- run_deseq2_analysis(
-      tidyrna_object, counts, metadata, design_formula, 
+    tidyseq_object <- run_deseq2_analysis(
+      tidyseq_object, counts, metadata, design_formula, 
       contrasts, coef, alpha, lfc_threshold, use_normalized
     )
   } else if (method == "limma-voom") {
-    tidyrna_object <- run_limma_voom_analysis(
-      tidyrna_object, counts, metadata, design_formula, 
+    tidyseq_object <- run_limma_voom_analysis(
+      tidyseq_object, counts, metadata, design_formula, 
       contrasts, coef, alpha, lfc_threshold, use_normalized
     )
   } else if (method == "edgeR") {
-    tidyrna_object <- run_edger_analysis(
-      tidyrna_object, counts, metadata, design_formula, 
+    tidyseq_object <- run_edger_analysis(
+      tidyseq_object, counts, metadata, design_formula, 
       contrasts, coef, alpha, lfc_threshold, use_normalized
     )
   } else {
@@ -219,7 +219,7 @@ run_de_analysis <- function(tidyrna_object,
   }
   
   # Store DE analysis parameters
-  tidyrna_object$parameters$de_analysis <- list(
+  tidyseq_object$parameters$de_analysis <- list(
     method = method,
     alpha = alpha,
     lfc_threshold = lfc_threshold,
@@ -227,12 +227,12 @@ run_de_analysis <- function(tidyrna_object,
     use_normalized = use_normalized
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Run DESeq2 differential expression analysis
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param counts Count data
 #' @param metadata Sample metadata
 #' @param design_formula Design formula
@@ -242,10 +242,10 @@ run_de_analysis <- function(tidyrna_object,
 #' @param lfc_threshold Log fold change threshold
 #' @param use_normalized Whether to use pre-computed normalized counts
 #'
-#' @return Updated tidyrna object with DESeq2 results
+#' @return Updated tidyseq object with DESeq2 results
 #'
 #' @keywords internal
-run_deseq2_analysis <- function(tidyrna_object, 
+run_deseq2_analysis <- function(tidyseq_object, 
                                 counts, 
                                 metadata, 
                                 design_formula, 
@@ -257,15 +257,15 @@ run_deseq2_analysis <- function(tidyrna_object,
   
   library(DESeq2)
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     "Running DESeq2 differential expression analysis",
     "log"
   )
   
   # Use existing DESeq2 object if available and appropriate
-  if (use_normalized && !is.null(tidyrna_object$deseq2_object)) {
-    dds <- tidyrna_object$deseq2_object
+  if (use_normalized && !is.null(tidyseq_object$deseq2_object)) {
+    dds <- tidyseq_object$deseq2_object
     
     # Update design if necessary
     if (!is.null(design_formula) && design_formula != design(dds)) {
@@ -313,8 +313,8 @@ run_deseq2_analysis <- function(tidyrna_object,
       
       # Log results
       sig_count <- sum(res_df$significant, na.rm = TRUE)
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Contrast ", contrast_name, ": ", sig_count, " significant genes (padj < ", 
                alpha, ", |log2FC| > ", lfc_threshold, ")"),
         "log"
@@ -343,8 +343,8 @@ run_deseq2_analysis <- function(tidyrna_object,
       
       # Log results
       sig_count <- sum(res_df$significant, na.rm = TRUE)
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Coefficient ", coef_name, ": ", sig_count, " significant genes (padj < ", 
                alpha, ", |log2FC| > ", lfc_threshold, ")"),
         "log"
@@ -355,18 +355,18 @@ run_deseq2_analysis <- function(tidyrna_object,
     warning("No contrasts or coefficients specified. No DE results generated.")
   }
   
-  # Store results in tidyrna object
-  tidyrna_object$de_results <- results_list
+  # Store results in tidyseq object
+  tidyseq_object$de_results <- results_list
   
   # Store DESeq2 object
-  tidyrna_object$deseq2_object <- dds
+  tidyseq_object$deseq2_object <- dds
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Run limma-voom differential expression analysis
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param counts Count data
 #' @param metadata Sample metadata
 #' @param design_formula Design formula
@@ -376,10 +376,10 @@ run_deseq2_analysis <- function(tidyrna_object,
 #' @param lfc_threshold Log fold change threshold
 #' @param use_normalized Whether to use pre-computed normalized counts
 #'
-#' @return Updated tidyrna object with limma-voom results
+#' @return Updated tidyseq object with limma-voom results
 #'
 #' @keywords internal
-run_limma_voom_analysis <- function(tidyrna_object, 
+run_limma_voom_analysis <- function(tidyseq_object, 
                                     counts, 
                                     metadata, 
                                     design_formula, 
@@ -392,8 +392,8 @@ run_limma_voom_analysis <- function(tidyrna_object,
   library(limma)
   library(edgeR)
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     "Running limma-voom differential expression analysis",
     "log"
   )
@@ -450,8 +450,8 @@ run_limma_voom_analysis <- function(tidyrna_object,
       
       # Log results
       sig_count <- sum(res$significant, na.rm = TRUE)
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Contrast ", contrast_name, ": ", sig_count, " significant genes (padj < ", 
                alpha, ", |log2FC| > ", lfc_threshold, ")"),
         "log"
@@ -487,8 +487,8 @@ run_limma_voom_analysis <- function(tidyrna_object,
       
       # Log results
       sig_count <- sum(res$significant, na.rm = TRUE)
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Coefficient ", coef_name, ": ", sig_count, " significant genes (padj < ", 
                alpha, ", |log2FC| > ", lfc_threshold, ")"),
         "log"
@@ -499,22 +499,22 @@ run_limma_voom_analysis <- function(tidyrna_object,
     warning("No contrasts or coefficients specified. No DE results generated.")
   }
   
-  # Store results in tidyrna object
-  tidyrna_object$de_results <- results_list
+  # Store results in tidyseq object
+  tidyseq_object$de_results <- results_list
   
   # Store limma-voom objects
-  tidyrna_object$limma_voom_object <- list(
+  tidyseq_object$limma_voom_object <- list(
     dge = dge,
     voom = v,
     fit = fit
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Run edgeR differential expression analysis
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param counts Count data
 #' @param metadata Sample metadata
 #' @param design_formula Design formula
@@ -524,10 +524,10 @@ run_limma_voom_analysis <- function(tidyrna_object,
 #' @param lfc_threshold Log fold change threshold
 #' @param use_normalized Whether to use pre-computed normalized counts
 #'
-#' @return Updated tidyrna object with edgeR results
+#' @return Updated tidyseq object with edgeR results
 #'
 #' @keywords internal
-run_edger_analysis <- function(tidyrna_object, 
+run_edger_analysis <- function(tidyseq_object, 
                                counts, 
                                metadata, 
                                design_formula, 
@@ -539,15 +539,15 @@ run_edger_analysis <- function(tidyrna_object,
   
   library(edgeR)
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     "Running edgeR differential expression analysis",
     "log"
   )
   
   # Use existing edgeR object if available and appropriate
-  if (use_normalized && !is.null(tidyrna_object$edger_object)) {
-    dge <- tidyrna_object$edger_object
+  if (use_normalized && !is.null(tidyseq_object$edger_object)) {
+    dge <- tidyseq_object$edger_object
   } else {
     # Create DGEList object
     dge <- edgeR::DGEList(counts = counts)
@@ -610,8 +610,8 @@ run_edger_analysis <- function(tidyrna_object,
       
       # Log results
       sig_count <- sum(res$significant, na.rm = TRUE)
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Contrast ", contrast_name, ": ", sig_count, " significant genes (padj < ", 
                alpha, ", |log2FC| > ", lfc_threshold, ")"),
         "log"
@@ -650,8 +650,8 @@ run_edger_analysis <- function(tidyrna_object,
       
       # Log results
       sig_count <- sum(res$significant, na.rm = TRUE)
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Coefficient ", coef_name, ": ", sig_count, " significant genes (padj < ", 
                alpha, ", |log2FC| > ", lfc_threshold, ")"),
         "log"
@@ -662,14 +662,14 @@ run_edger_analysis <- function(tidyrna_object,
     warning("No contrasts or coefficients specified. No DE results generated.")
   }
   
-  # Store results in tidyrna object
-  tidyrna_object$de_results <- results_list
+  # Store results in tidyseq object
+  tidyseq_object$de_results <- results_list
   
   # Store edgeR objects
-  tidyrna_object$edger_object <- list(
+  tidyseq_object$edger_object <- list(
     dge = dge,
     fit = fit
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }

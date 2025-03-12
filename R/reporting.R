@@ -2,27 +2,27 @@
 #'
 #' @description Generate a comprehensive quality control report for RNA-Seq data
 #'
-#' @param tidyrna_object A tidyrna object with raw/filtered/normalized counts
+#' @param tidyseq_object A tidyseq object with raw/filtered/normalized counts
 #' @param output_dir Output directory for report
 #' @param file_name Report file name (default: "qc_report.html")
 #' @param include_sections Sections to include (default: all)
 #' @param interactive Whether to include interactive plots (default: TRUE)
 #'
-#' @return A tidyrna object with QC report path
+#' @return A tidyseq object with QC report path
 #'
 #' @export
-create_qc_report <- function(tidyrna_object,
+create_qc_report <- function(tidyseq_object,
                               output_dir,
                               file_name = "qc_report.html",
                               include_sections = c("summary", "raw_counts", "filtered_counts", "normalization", "pca", "correlation"),
                               interactive = TRUE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if required data is available
-  if (is.null(tidyrna_object$raw_counts)) {
+  if (is.null(tidyseq_object$raw_counts)) {
     stop("Raw counts not found. Run import_data() first.")
   }
   
@@ -35,14 +35,14 @@ create_qc_report <- function(tidyrna_object,
   output_path <- file.path(output_dir, file_name)
   
   # Log report creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Creating QC report: ", output_path),
     "log"
   )
   
   # Create RMarkdown template
-  temp_rmd <- generate_qc_rmd_template(tidyrna_object, include_sections, interactive)
+  temp_rmd <- generate_qc_rmd_template(tidyseq_object, include_sections, interactive)
   
   # Define temporary RMarkdown file
   temp_file <- tempfile(fileext = ".Rmd")
@@ -61,54 +61,54 @@ create_qc_report <- function(tidyrna_object,
   # Clean up temporary file
   unlink(temp_file)
   
-  # Store report path in tidyrna object
-  tidyrna_object$reports$qc_report <- output_path
+  # Store report path in tidyseq object
+  tidyseq_object$reports$qc_report <- output_path
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("QC report created successfully: ", output_path),
     "log"
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Create a differential expression analysis report
 #'
 #' @description Generate a comprehensive report of differential expression results
 #'
-#' @param tidyrna_object A tidyrna object with DE results
+#' @param tidyseq_object A tidyseq object with DE results
 #' @param contrasts Contrasts to include (default: all)
 #' @param output_dir Output directory for report
 #' @param file_name Report file name (default: "de_report.html")
 #' @param include_sections Sections to include (default: all)
 #' @param interactive Whether to include interactive plots (default: TRUE)
 #'
-#' @return A tidyrna object with DE report path
+#' @return A tidyseq object with DE report path
 #'
 #' @export
-create_de_report <- function(tidyrna_object,
+create_de_report <- function(tidyseq_object,
                               contrasts = NULL,
                               output_dir,
                               file_name = "de_report.html",
                               include_sections = c("summary", "volcano", "ma", "heatmap", "top_genes"),
                               interactive = TRUE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if DE results are available
-  if (length(tidyrna_object$de_results) == 0) {
+  if (length(tidyseq_object$de_results) == 0) {
     stop("DE results not found. Run run_de_analysis() first.")
   }
   
   # Use all contrasts if not specified
   if (is.null(contrasts)) {
-    contrasts <- names(tidyrna_object$de_results)
+    contrasts <- names(tidyseq_object$de_results)
   } else {
     # Check if specified contrasts exist
-    missing_contrasts <- setdiff(contrasts, names(tidyrna_object$de_results))
+    missing_contrasts <- setdiff(contrasts, names(tidyseq_object$de_results))
     if (length(missing_contrasts) > 0) {
       stop("Specified contrasts not found: ", paste(missing_contrasts, collapse = ", "))
     }
@@ -123,14 +123,14 @@ create_de_report <- function(tidyrna_object,
   output_path <- file.path(output_dir, file_name)
   
   # Log report creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Creating DE report: ", output_path),
     "log"
   )
   
   # Create RMarkdown template
-  temp_rmd <- generate_de_rmd_template(tidyrna_object, contrasts, include_sections, interactive)
+  temp_rmd <- generate_de_rmd_template(tidyseq_object, contrasts, include_sections, interactive)
   
   # Define temporary RMarkdown file
   temp_file <- tempfile(fileext = ".Rmd")
@@ -149,67 +149,67 @@ create_de_report <- function(tidyrna_object,
   # Clean up temporary file
   unlink(temp_file)
   
-  # Store report path in tidyrna object
-  tidyrna_object$reports$de_report <- output_path
+  # Store report path in tidyseq object
+  tidyseq_object$reports$de_report <- output_path
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("DE report created successfully: ", output_path),
     "log"
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Create an enrichment analysis report
 #'
 #' @description Generate a comprehensive report of functional enrichment results
 #'
-#' @param tidyrna_object A tidyrna object with enrichment results
+#' @param tidyseq_object A tidyseq object with enrichment results
 #' @param result_types Enrichment types to include (default: all)
 #' @param contrasts Contrasts to include (default: all)
 #' @param output_dir Output directory for report
 #' @param file_name Report file name (default: "enrichment_report.html")
 #' @param interactive Whether to include interactive plots (default: TRUE)
 #'
-#' @return A tidyrna object with enrichment report path
+#' @return A tidyseq object with enrichment report path
 #'
 #' @export
-create_enrichment_report <- function(tidyrna_object,
+create_enrichment_report <- function(tidyseq_object,
                                       result_types = NULL,
                                       contrasts = NULL,
                                       output_dir,
                                       file_name = "enrichment_report.html",
                                       interactive = TRUE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if enrichment results are available
-  if (length(tidyrna_object$enrichment_results) == 0) {
+  if (length(tidyseq_object$enrichment_results) == 0) {
     stop("Enrichment results not found. Run enrichment functions first.")
   }
   
   # Use all result types if not specified
   if (is.null(result_types)) {
-    result_types <- sapply(strsplit(names(tidyrna_object$enrichment_results), "_"), function(x) x[2])
+    result_types <- sapply(strsplit(names(tidyseq_object$enrichment_results), "_"), function(x) x[2])
     result_types <- unique(result_types)
   }
   
   # Use all contrasts if not specified
   if (is.null(contrasts)) {
-    all_names <- names(tidyrna_object$enrichment_results)
+    all_names <- names(tidyseq_object$enrichment_results)
     contrast_names <- sapply(strsplit(all_names, "_"), function(x) x[1])
     contrasts <- unique(contrast_names)
   }
   
   # Filter enrichment results to specified types and contrasts
   enrich_results <- list()
-  for (name in names(tidyrna_object$enrichment_results)) {
+  for (name in names(tidyseq_object$enrichment_results)) {
     parts <- strsplit(name, "_")[[1]]
     if (parts[1] %in% contrasts && parts[2] %in% result_types) {
-      enrich_results[[name]] <- tidyrna_object$enrichment_results[[name]]
+      enrich_results[[name]] <- tidyseq_object$enrichment_results[[name]]
     }
   }
   
@@ -226,14 +226,14 @@ create_enrichment_report <- function(tidyrna_object,
   output_path <- file.path(output_dir, file_name)
   
   # Log report creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Creating enrichment report: ", output_path),
     "log"
   )
   
   # Create RMarkdown template
-  temp_rmd <- generate_enrichment_rmd_template(tidyrna_object, enrich_results, interactive)
+  temp_rmd <- generate_enrichment_rmd_template(tidyseq_object, enrich_results, interactive)
   
   # Define temporary RMarkdown file
   temp_file <- tempfile(fileext = ".Rmd")
@@ -252,43 +252,43 @@ create_enrichment_report <- function(tidyrna_object,
   # Clean up temporary file
   unlink(temp_file)
   
-  # Store report path in tidyrna object
-  tidyrna_object$reports$enrichment_report <- output_path
+  # Store report path in tidyseq object
+  tidyseq_object$reports$enrichment_report <- output_path
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Enrichment report created successfully: ", output_path),
     "log"
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Create a comprehensive RNA-Seq analysis report
 #'
 #' @description Generate a comprehensive report including all analysis results
 #'
-#' @param tidyrna_object A tidyrna object with analysis results
+#' @param tidyseq_object A tidyseq object with analysis results
 #' @param output_dir Output directory for report
 #' @param file_name Report file name (default: "rnaseq_report.html")
 #' @param include_sections Sections to include (default: all)
 #' @param interactive Whether to include interactive plots (default: TRUE)
 #'
-#' @return A tidyrna object with full report path
+#' @return A tidyseq object with full report path
 #'
 #' @export
-create_full_report <- function(tidyrna_object,
+create_full_report <- function(tidyseq_object,
                                 output_dir,
                                 file_name = "rnaseq_report.html",
                                 include_sections = c("summary", "qc", "de", "enrichment"),
                                 interactive = TRUE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if required results exist
-  if (is.null(tidyrna_object$raw_counts)) {
+  if (is.null(tidyseq_object$raw_counts)) {
     stop("Raw counts not found. Run import_data() first.")
   }
   
@@ -301,14 +301,14 @@ create_full_report <- function(tidyrna_object,
   output_path <- file.path(output_dir, file_name)
   
   # Log report creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Creating full RNA-Seq report: ", output_path),
     "log"
   )
   
   # Create RMarkdown template
-  temp_rmd <- generate_full_rmd_template(tidyrna_object, include_sections, interactive)
+  temp_rmd <- generate_full_rmd_template(tidyseq_object, include_sections, interactive)
   
   # Define temporary RMarkdown file
   temp_file <- tempfile(fileext = ".Rmd")
@@ -327,28 +327,28 @@ create_full_report <- function(tidyrna_object,
   # Clean up temporary file
   unlink(temp_file)
   
-  # Store report path in tidyrna object
-  tidyrna_object$reports$full_report <- output_path
+  # Store report path in tidyseq object
+  tidyseq_object$reports$full_report <- output_path
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Full RNA-Seq report created successfully: ", output_path),
     "log"
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Generate QC report RMarkdown template
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param include_sections Sections to include
 #' @param interactive Whether to include interactive plots
 #'
 #' @return RMarkdown template as character vector
 #'
 #' @keywords internal
-generate_qc_rmd_template <- function(tidyrna_object, include_sections, interactive) {
+generate_qc_rmd_template <- function(tidyseq_object, include_sections, interactive) {
   
   # Create RMarkdown header
   rmd <- c(
@@ -389,10 +389,10 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
       "",
       "```{r summary}",
       "# Get data dimensions",
-      "raw_counts <- tidyrna_object$raw_counts",
-      "metadata <- tidyrna_object$metadata",
-      "has_filtered <- !is.null(tidyrna_object$filtered_counts)",
-      "has_normalized <- !is.null(tidyrna_object$normalized_counts)",
+      "raw_counts <- tidyseq_object$raw_counts",
+      "metadata <- tidyseq_object$metadata",
+      "has_filtered <- !is.null(tidyseq_object$filtered_counts)",
+      "has_normalized <- !is.null(tidyseq_object$normalized_counts)",
       "",
       "# Create summary tables",
       "data_summary <- data.frame(",
@@ -400,8 +400,8 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
       "  Value = c(",
       "    ncol(raw_counts),",
       "    nrow(raw_counts),",
-      "    ifelse(has_filtered, nrow(tidyrna_object$filtered_counts), \"Not performed\"),",
-      "    ifelse(has_normalized, tidyrna_object$normalization_method, \"Not performed\")",
+      "    ifelse(has_filtered, nrow(tidyseq_object$filtered_counts), \"Not performed\"),",
+      "    ifelse(has_normalized, tidyseq_object$normalization_method, \"Not performed\")",
       "  )",
       ")",
       "",
@@ -490,13 +490,13 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
   }
   
   # Add filtered counts section if included
-  if ("filtered_counts" %in% include_sections && !is.null(tidyrna_object$filtered_counts)) {
+  if ("filtered_counts" %in% include_sections && !is.null(tidyseq_object$filtered_counts)) {
     rmd <- c(rmd,
       "## Filtered Count Analysis",
       "",
       "```{r filtered_counts}",
       "# Get filtering parameters",
-      "filtering_params <- tidyrna_object$parameters$filtering",
+      "filtering_params <- tidyseq_object$parameters$filtering",
       "",
       "# Create parameter info",
       "param_info <- data.frame(",
@@ -517,7 +517,7 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
       "```{r filtering_results}",
       "# Calculate filtering statistics",
       "raw_genes <- nrow(raw_counts)",
-      "filtered_genes <- nrow(tidyrna_object$filtered_counts)",
+      "filtered_genes <- nrow(tidyseq_object$filtered_counts)",
       "removed_genes <- raw_genes - filtered_genes",
       "percent_removed <- removed_genes / raw_genes * 100",
       "",
@@ -540,7 +540,7 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
       "",
       "```{r filtered_distribution}",
       "# Prepare filtered counts for plotting",
-      "filtered_counts <- tidyrna_object$filtered_counts",
+      "filtered_counts <- tidyseq_object$filtered_counts",
       "filtered_long <- tidyr::pivot_longer(as.data.frame(filtered_counts), ",
       "                                   cols = everything(), ",
       "                                   names_to = \"Sample\", ",
@@ -565,13 +565,13 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
   }
   
   # Add normalization section if included
-  if ("normalization" %in% include_sections && !is.null(tidyrna_object$normalized_counts)) {
+  if ("normalization" %in% include_sections && !is.null(tidyseq_object$normalized_counts)) {
     rmd <- c(rmd,
       "## Normalized Count Analysis",
       "",
       "```{r normalization_info}",
       "# Get normalization parameters",
-      "norm_params <- tidyrna_object$parameters$normalization",
+      "norm_params <- tidyseq_object$parameters$normalization",
       "",
       "# Create parameter info",
       "norm_info <- data.frame(",
@@ -590,7 +590,7 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
       "",
       "```{r normalized_distribution}",
       "# Prepare normalized counts for plotting",
-      "norm_counts <- tidyrna_object$normalized_counts",
+      "norm_counts <- tidyseq_object$normalized_counts",
       "norm_long <- tidyr::pivot_longer(as.data.frame(norm_counts), ",
       "                              cols = everything(), ",
       "                              names_to = \"Sample\", ",
@@ -632,13 +632,13 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
   }
   
   # Add PCA section if included
-  if ("pca" %in% include_sections && !is.null(tidyrna_object$normalized_counts)) {
+  if ("pca" %in% include_sections && !is.null(tidyseq_object$normalized_counts)) {
     rmd <- c(rmd,
       "## Principal Component Analysis",
       "",
       "```{r pca_setup, echo=FALSE}",
       "# Prepare metadata with colors",
-      "metadata <- tidyrna_object$metadata",
+      "metadata <- tidyseq_object$metadata",
       "color_by <- colnames(metadata)[2]  # Use the second column as default color",
       "```",
       "",
@@ -646,7 +646,7 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
       "",
       "```{r pca_plot}",
       "# Generate PCA plot",
-      "pca_plot <- plot_pca(tidyrna_object, color_by = color_by, interactive = ",
+      "pca_plot <- plot_pca(tidyseq_object, color_by = color_by, interactive = ",
       if (interactive) "TRUE" else "FALSE",
       ")",
       "pca_plot",
@@ -656,7 +656,7 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
       "",
       "```{r pca_plot_23}",
       "# Generate PCA plot for PC2 vs PC3",
-      "pca_plot_23 <- plot_pca(tidyrna_object, color_by = color_by, components = c(2, 3), interactive = ",
+      "pca_plot_23 <- plot_pca(tidyseq_object, color_by = color_by, components = c(2, 3), interactive = ",
       if (interactive) "TRUE" else "FALSE",
       ")",
       "pca_plot_23",
@@ -666,20 +666,20 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
   }
   
   # Add correlation section if included
-  if ("correlation" %in% include_sections && !is.null(tidyrna_object$normalized_counts)) {
+  if ("correlation" %in% include_sections && !is.null(tidyseq_object$normalized_counts)) {
     rmd <- c(rmd,
       "## Sample Correlation Analysis",
       "",
       "```{r correlation}",
       "# Calculate sample correlation matrix",
-      "norm_counts <- tidyrna_object$normalized_counts",
+      "norm_counts <- tidyseq_object$normalized_counts",
       "cor_matrix <- cor(norm_counts, method = \"pearson\")",
       "",
       "# Create heatmap of correlation matrix",
       "# Get metadata for annotations if available",
-      "if (!is.null(tidyrna_object$metadata) && ncol(tidyrna_object$metadata) > 1) {",
+      "if (!is.null(tidyseq_object$metadata) && ncol(tidyseq_object$metadata) > 1) {",
       "  # Use first two columns of metadata for annotations",
-      "  annotation_data <- tidyrna_object$metadata[colnames(cor_matrix), 1:min(2, ncol(tidyrna_object$metadata)), drop = FALSE]",
+      "  annotation_data <- tidyseq_object$metadata[colnames(cor_matrix), 1:min(2, ncol(tidyseq_object$metadata)), drop = FALSE]",
       "  pheatmap(cor_matrix, main = \"Sample Correlation Heatmap\", annotation_col = annotation_data)",
       "} else {",
       "  # No annotations",
@@ -709,7 +709,7 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
 
 #' Generate DE report RMarkdown template
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param contrasts Contrasts to include
 #' @param include_sections Sections to include
 #' @param interactive Whether to include interactive plots
@@ -717,7 +717,7 @@ generate_qc_rmd_template <- function(tidyrna_object, include_sections, interacti
 #' @return RMarkdown template as character vector
 #'
 #' @keywords internal
-generate_de_rmd_template <- function(tidyrna_object, contrasts, include_sections, interactive) {
+generate_de_rmd_template <- function(tidyseq_object, contrasts, include_sections, interactive) {
   
   # Create RMarkdown header
   rmd <- c(
@@ -758,7 +758,7 @@ generate_de_rmd_template <- function(tidyrna_object, contrasts, include_sections
       "",
       "```{r summary}",
       "# Get DE parameters",
-      "de_params <- tidyrna_object$parameters$de_analysis",
+      "de_params <- tidyseq_object$parameters$de_analysis",
       "",
       "# Create parameter info",
       "param_info <- data.frame(",
@@ -781,7 +781,7 @@ generate_de_rmd_template <- function(tidyrna_object, contrasts, include_sections
       "contrast_summaries <- list()",
       "",
       "for (contrast in contrasts) {",
-      "  de_result <- tidyrna_object$de_results[[contrast]]",
+      "  de_result <- tidyseq_object$de_results[[contrast]]",
       "  total_genes <- nrow(de_result)",
       "  up_genes <- sum(de_result$log2FoldChange > 0 & de_result$padj < de_params$alpha, na.rm = TRUE)",
       "  down_genes <- sum(de_result$log2FoldChange < 0 & de_result$padj < de_params$alpha, na.rm = TRUE)",
@@ -822,7 +822,7 @@ generate_de_rmd_template <- function(tidyrna_object, contrasts, include_sections
         "",
         paste0("```{r volcano_", gsub("[^a-zA-Z0-9]", "_", contrast), "}"),
         "# Generate volcano plot",
-        paste0("volcano_plot <- plot_volcano(tidyrna_object, contrast = \"", contrast, "\", interactive = ", 
+        paste0("volcano_plot <- plot_volcano(tidyseq_object, contrast = \"", contrast, "\", interactive = ", 
                if (interactive) "TRUE" else "FALSE", ")"),
         "volcano_plot",
         "```",
@@ -837,7 +837,7 @@ generate_de_rmd_template <- function(tidyrna_object, contrasts, include_sections
         "",
         paste0("```{r ma_", gsub("[^a-zA-Z0-9]", "_", contrast), "}"),
         "# Generate MA plot",
-        paste0("ma_plot <- plot_ma(tidyrna_object, contrast = \"", contrast, "\", interactive = ", 
+        paste0("ma_plot <- plot_ma(tidyseq_object, contrast = \"", contrast, "\", interactive = ", 
                if (interactive) "TRUE" else "FALSE", ")"),
         "ma_plot",
         "```",
@@ -852,7 +852,7 @@ generate_de_rmd_template <- function(tidyrna_object, contrasts, include_sections
         "",
         paste0("```{r heatmap_", gsub("[^a-zA-Z0-9]", "_", contrast), "}"),
         "# Generate heatmap",
-        paste0("heatmap_plot <- plot_de_heatmap(tidyrna_object, contrast = \"", contrast, "\", n_genes = 50)"),
+        paste0("heatmap_plot <- plot_de_heatmap(tidyseq_object, contrast = \"", contrast, "\", n_genes = 50)"),
         "```",
         ""
       )
@@ -865,7 +865,7 @@ generate_de_rmd_template <- function(tidyrna_object, contrasts, include_sections
         "",
         paste0("```{r top_genes_", gsub("[^a-zA-Z0-9]", "_", contrast), "}"),
         "# Get DE results",
-        paste0("de_result <- tidyrna_object$de_results[[\\"", contrast, "\\"]]"),
+        paste0("de_result <- tidyseq_object$de_results[[\\"", contrast, "\\"]]"),
         "",
         "# Sort by adjusted p-value",
         "de_result <- de_result[order(de_result$padj), ]",
@@ -904,14 +904,14 @@ generate_de_rmd_template <- function(tidyrna_object, contrasts, include_sections
 
 #' Generate enrichment report RMarkdown template
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param enrich_results Enrichment results to include
 #' @param interactive Whether to include interactive plots
 #'
 #' @return RMarkdown template as character vector
 #'
 #' @keywords internal
-generate_enrichment_rmd_template <- function(tidyrna_object, enrich_results, interactive) {
+generate_enrichment_rmd_template <- function(tidyseq_object, enrich_results, interactive) {
   
   # Create RMarkdown header
   rmd <- c(
@@ -1091,14 +1091,14 @@ generate_enrichment_rmd_template <- function(tidyrna_object, enrich_results, int
 
 #' Generate comprehensive RNA-Seq report RMarkdown template
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param include_sections Sections to include
 #' @param interactive Whether to include interactive plots
 #'
 #' @return RMarkdown template as character vector
 #'
 #' @keywords internal
-generate_full_rmd_template <- function(tidyrna_object, include_sections, interactive) {
+generate_full_rmd_template <- function(tidyseq_object, include_sections, interactive) {
   
   # Create RMarkdown header
   rmd <- c(
@@ -1140,12 +1140,12 @@ generate_full_rmd_template <- function(tidyrna_object, include_sections, interac
     "",
     "```{r summary}",
     "# Get data dimensions",
-    "raw_counts <- tidyrna_object$raw_counts",
-    "metadata <- tidyrna_object$metadata",
-    "has_filtered <- !is.null(tidyrna_object$filtered_counts)",
-    "has_normalized <- !is.null(tidyrna_object$normalized_counts)",
-    "has_de <- length(tidyrna_object$de_results) > 0",
-    "has_enrichment <- length(tidyrna_object$enrichment_results) > 0",
+    "raw_counts <- tidyseq_object$raw_counts",
+    "metadata <- tidyseq_object$metadata",
+    "has_filtered <- !is.null(tidyseq_object$filtered_counts)",
+    "has_normalized <- !is.null(tidyseq_object$normalized_counts)",
+    "has_de <- length(tidyseq_object$de_results) > 0",
+    "has_enrichment <- length(tidyseq_object$enrichment_results) > 0",
     "",
     "# Create summary tables",
     "data_summary <- data.frame(",
@@ -1154,10 +1154,10 @@ generate_full_rmd_template <- function(tidyrna_object, include_sections, interac
     "  Value = c(",
     "    ncol(raw_counts),",
     "    nrow(raw_counts),",
-    "    ifelse(has_filtered, nrow(tidyrna_object$filtered_counts), \"Not performed\"),",
-    "    ifelse(has_normalized, tidyrna_object$normalization_method, \"Not performed\"),",
-    "    ifelse(has_de, length(tidyrna_object$de_results), \"Not performed\"),",
-    "    ifelse(has_enrichment, length(tidyrna_object$enrichment_results), \"Not performed\")",
+    "    ifelse(has_filtered, nrow(tidyseq_object$filtered_counts), \"Not performed\"),",
+    "    ifelse(has_normalized, tidyseq_object$normalization_method, \"Not performed\"),",
+    "    ifelse(has_de, length(tidyseq_object$de_results), \"Not performed\"),",
+    "    ifelse(has_enrichment, length(tidyseq_object$enrichment_results), \"Not performed\")",
     "  )",
     ")",
     "",
@@ -1205,19 +1205,19 @@ generate_full_rmd_template <- function(tidyrna_object, include_sections, interac
     )
     
     # Add PCA plot if normalized counts are available
-    if (!is.null(tidyrna_object$normalized_counts)) {
+    if (!is.null(tidyseq_object$normalized_counts)) {
       rmd <- c(rmd,
         "### Principal Component Analysis",
         "",
         "```{r pca_setup, echo=FALSE}",
         "# Prepare metadata with colors",
-        "metadata <- tidyrna_object$metadata",
+        "metadata <- tidyseq_object$metadata",
         "color_by <- colnames(metadata)[2]  # Use the second column as default color",
         "```",
         "",
         "```{r pca_plot}",
         "# Generate PCA plot",
-        "pca_plot <- plot_pca(tidyrna_object, color_by = color_by, interactive = ",
+        "pca_plot <- plot_pca(tidyseq_object, color_by = color_by, interactive = ",
         if (interactive) "TRUE" else "FALSE",
         ")",
         "pca_plot",
@@ -1228,16 +1228,16 @@ generate_full_rmd_template <- function(tidyrna_object, include_sections, interac
   }
   
   # Add DE section if included
-  if ("de" %in% include_sections && length(tidyrna_object$de_results) > 0) {
+  if ("de" %in% include_sections && length(tidyseq_object$de_results) > 0) {
     # Get contrasts
-    contrasts <- names(tidyrna_object$de_results)
+    contrasts <- names(tidyseq_object$de_results)
     
     rmd <- c(rmd,
       "## Differential Expression Analysis",
       "",
       "```{r de_summary}",
       "# Get DE parameters",
-      "de_params <- tidyrna_object$parameters$de_analysis",
+      "de_params <- tidyseq_object$parameters$de_analysis",
       "",
       "# Create parameter info",
       "param_info <- data.frame(",
@@ -1260,7 +1260,7 @@ generate_full_rmd_template <- function(tidyrna_object, include_sections, interac
       "contrast_summaries <- list()",
       "",
       "for (contrast in contrasts) {",
-      "  de_result <- tidyrna_object$de_results[[contrast]]",
+      "  de_result <- tidyseq_object$de_results[[contrast]]",
       "  total_genes <- nrow(de_result)",
       "  up_genes <- sum(de_result$log2FoldChange > 0 & de_result$padj < de_params$alpha, na.rm = TRUE)",
       "  down_genes <- sum(de_result$log2FoldChange < 0 & de_result$padj < de_params$alpha, na.rm = TRUE)",
@@ -1297,7 +1297,7 @@ generate_full_rmd_template <- function(tidyrna_object, include_sections, interac
         "",
         paste0("```{r volcano_", gsub("[^a-zA-Z0-9]", "_", contrast), "}"),
         "# Generate volcano plot",
-        paste0("volcano_plot <- plot_volcano(tidyrna_object, contrast = \"", contrast, "\", interactive = ", 
+        paste0("volcano_plot <- plot_volcano(tidyseq_object, contrast = \"", contrast, "\", interactive = ", 
                if (interactive) "TRUE" else "FALSE", ")"),
         "volcano_plot",
         "```",
@@ -1307,9 +1307,9 @@ generate_full_rmd_template <- function(tidyrna_object, include_sections, interac
   }
   
   # Add enrichment section if included
-  if ("enrichment" %in% include_sections && length(tidyrna_object$enrichment_results) > 0) {
+  if ("enrichment" %in% include_sections && length(tidyseq_object$enrichment_results) > 0) {
     # Get enrichment results
-    enrich_results <- tidyrna_object$enrichment_results
+    enrich_results <- tidyseq_object$enrichment_results
     
     rmd <- c(rmd,
       "## Functional Enrichment Analysis",

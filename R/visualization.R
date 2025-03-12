@@ -2,7 +2,7 @@
 #'
 #' @description Create a PCA plot from normalized expression data
 #'
-#' @param tidyrna_object A tidyrna object with normalized counts
+#' @param tidyseq_object A tidyseq object with normalized counts
 #' @param color_by Column in metadata to color points by
 #' @param shape_by Column in metadata to shape points by (optional)
 #' @param label_points Whether to add sample labels to points (default: FALSE)
@@ -12,36 +12,36 @@
 #' @return A ggplot2 object (or plotly object if interactive = TRUE)
 #'
 #' @export
-plot_pca <- function(tidyrna_object,
+plot_pca <- function(tidyseq_object,
                       color_by = NULL,
                       shape_by = NULL,
                       label_points = FALSE,
                       components = c(1, 2),
                       interactive = FALSE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if normalized counts are available
-  if (is.null(tidyrna_object$normalized_counts)) {
+  if (is.null(tidyseq_object$normalized_counts)) {
     stop("No normalized counts found. Run normalize_counts() first.")
   }
   
   # Check if metadata is available
-  if (is.null(tidyrna_object$metadata)) {
+  if (is.null(tidyseq_object$metadata)) {
     stop("No metadata found. Run import_data() first.")
   }
   
   # Log PCA plot creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     "Generating PCA plot",
     "log"
   )
   
   # Get normalized counts and transform if needed
-  counts <- tidyrna_object$normalized_counts
+  counts <- tidyseq_object$normalized_counts
   
   # Log transform if not already done
   if (max(counts, na.rm = TRUE) > 30) {
@@ -61,7 +61,7 @@ plot_pca <- function(tidyrna_object,
   pca_data$sample <- rownames(pca_data)
   
   # Add metadata
-  metadata <- tidyrna_object$metadata
+  metadata <- tidyseq_object$metadata
   pca_data <- merge(pca_data, metadata, by.x = "sample", by.y = "row.names")
   
   # Calculate variance explained
@@ -125,7 +125,7 @@ plot_pca <- function(tidyrna_object,
 #'
 #' @description Create a heatmap of top DE genes from a specific contrast
 #'
-#' @param tidyrna_object A tidyrna object with DE results and normalized counts
+#' @param tidyseq_object A tidyseq object with DE results and normalized counts
 #' @param contrast Name of contrast to visualize
 #' @param n_genes Number of top genes to include (default: 50)
 #' @param cluster_rows Whether to cluster rows (default: TRUE)
@@ -138,7 +138,7 @@ plot_pca <- function(tidyrna_object,
 #' @return A heatmap object
 #'
 #' @export
-plot_de_heatmap <- function(tidyrna_object,
+plot_de_heatmap <- function(tidyseq_object,
                              contrast,
                              n_genes = 50,
                              cluster_rows = TRUE,
@@ -148,34 +148,34 @@ plot_de_heatmap <- function(tidyrna_object,
                              annotation_cols = NULL,
                              color_scale = c("blue", "white", "red")) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if DE results are available
-  if (is.null(tidyrna_object$de_results) || length(tidyrna_object$de_results) == 0) {
+  if (is.null(tidyseq_object$de_results) || length(tidyseq_object$de_results) == 0) {
     stop("No DE results found. Run run_de_analysis() first.")
   }
   
   # Check if specified contrast exists
-  if (!contrast %in% names(tidyrna_object$de_results)) {
+  if (!contrast %in% names(tidyseq_object$de_results)) {
     stop("Specified contrast not found: ", contrast)
   }
   
   # Check if normalized counts are available
-  if (is.null(tidyrna_object$normalized_counts)) {
+  if (is.null(tidyseq_object$normalized_counts)) {
     stop("No normalized counts found. Run normalize_counts() first.")
   }
   
   # Log heatmap creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Generating heatmap for contrast: ", contrast),
     "log"
   )
   
   # Get DE results for the contrast
-  de_result <- tidyrna_object$de_results[[contrast]]
+  de_result <- tidyseq_object$de_results[[contrast]]
   
   # Sort by adjusted p-value
   de_result <- de_result[order(de_result$padj), ]
@@ -184,7 +184,7 @@ plot_de_heatmap <- function(tidyrna_object,
   top_genes <- de_result$gene_id[1:min(n_genes, nrow(de_result))]
   
   # Get normalized counts for top genes
-  counts <- tidyrna_object$normalized_counts
+  counts <- tidyseq_object$normalized_counts
   top_counts <- counts[rownames(counts) %in% top_genes, ]
   
   # Log transform if not already done
@@ -200,13 +200,13 @@ plot_de_heatmap <- function(tidyrna_object,
     library(pheatmap)
     
     # Check if specified columns exist
-    missing_cols <- setdiff(annotation_cols, colnames(tidyrna_object$metadata))
+    missing_cols <- setdiff(annotation_cols, colnames(tidyseq_object$metadata))
     if (length(missing_cols) > 0) {
       stop("Specified annotation columns not found: ", paste(missing_cols, collapse = ", "))
     }
     
     # Create annotation data frame
-    annotation_data <- tidyrna_object$metadata[colnames(top_counts), annotation_cols, drop = FALSE]
+    annotation_data <- tidyseq_object$metadata[colnames(top_counts), annotation_cols, drop = FALSE]
     
     # Generate heatmap with annotations
     heatmap <- pheatmap::pheatmap(
@@ -244,7 +244,7 @@ plot_de_heatmap <- function(tidyrna_object,
 #'
 #' @description Create a volcano plot from differential expression analysis
 #'
-#' @param tidyrna_object A tidyrna object with DE results
+#' @param tidyseq_object A tidyseq object with DE results
 #' @param contrast Name of contrast to visualize
 #' @param p_cutoff P-value cutoff for significance (default: 0.05)
 #' @param lfc_cutoff Log fold change cutoff for significance (default: 1)
@@ -255,7 +255,7 @@ plot_de_heatmap <- function(tidyrna_object,
 #' @return A ggplot2 object (or plotly object if interactive = TRUE)
 #'
 #' @export
-plot_volcano <- function(tidyrna_object,
+plot_volcano <- function(tidyseq_object,
                           contrast,
                           p_cutoff = 0.05,
                           lfc_cutoff = 1,
@@ -263,29 +263,29 @@ plot_volcano <- function(tidyrna_object,
                           n_labels = 10,
                           interactive = FALSE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if DE results are available
-  if (is.null(tidyrna_object$de_results) || length(tidyrna_object$de_results) == 0) {
+  if (is.null(tidyseq_object$de_results) || length(tidyseq_object$de_results) == 0) {
     stop("No DE results found. Run run_de_analysis() first.")
   }
   
   # Check if specified contrast exists
-  if (!contrast %in% names(tidyrna_object$de_results)) {
+  if (!contrast %in% names(tidyseq_object$de_results)) {
     stop("Specified contrast not found: ", contrast)
   }
   
   # Log volcano plot creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Generating volcano plot for contrast: ", contrast),
     "log"
   )
   
   # Get DE results for the contrast
-  de_result <- tidyrna_object$de_results[[contrast]]
+  de_result <- tidyseq_object$de_results[[contrast]]
   
   # Add -log10(pvalue) column
   de_result$neg_log10_pvalue <- -log10(de_result$pvalue)
@@ -361,7 +361,7 @@ plot_volcano <- function(tidyrna_object,
 #'
 #' @description Create a dotplot visualization of enrichment results
 #'
-#' @param tidyrna_object A tidyrna object with enrichment results
+#' @param tidyseq_object A tidyseq object with enrichment results
 #' @param result_name Name of enrichment result to visualize
 #' @param n_terms Number of top terms to include (default: 20)
 #' @param color_by Which metric to use for coloring. One of "pvalue", "p.adjust", or "qvalue" (default: "p.adjust")
@@ -371,36 +371,36 @@ plot_volcano <- function(tidyrna_object,
 #' @return A ggplot2 object (or plotly object if interactive = TRUE)
 #'
 #' @export
-plot_enrichment_dotplot <- function(tidyrna_object,
+plot_enrichment_dotplot <- function(tidyseq_object,
                                      result_name,
                                      n_terms = 20,
                                      color_by = "p.adjust",
                                      size_by = "count",
                                      interactive = FALSE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if enrichment results are available
-  if (is.null(tidyrna_object$enrichment_results) || length(tidyrna_object$enrichment_results) == 0) {
+  if (is.null(tidyseq_object$enrichment_results) || length(tidyseq_object$enrichment_results) == 0) {
     stop("No enrichment results found. Run enrichment functions first.")
   }
   
   # Check if specified result exists
-  if (!result_name %in% names(tidyrna_object$enrichment_results)) {
+  if (!result_name %in% names(tidyseq_object$enrichment_results)) {
     stop("Specified enrichment result not found: ", result_name)
   }
   
   # Log dotplot creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Generating enrichment dotplot for: ", result_name),
     "log"
   )
   
   # Get enrichment result
-  enrichment_result <- tidyrna_object$enrichment_results[[result_name]]
+  enrichment_result <- tidyseq_object$enrichment_results[[result_name]]
   
   # Handle GO results differently (they're in a list by ontology)
   if (is.list(enrichment_result) && !is.null(enrichment_result$BP)) {
@@ -503,7 +503,7 @@ plot_enrichment_dotplot <- function(tidyrna_object,
 #'
 #' @description Create a MA plot from differential expression analysis
 #'
-#' @param tidyrna_object A tidyrna object with DE results
+#' @param tidyseq_object A tidyseq object with DE results
 #' @param contrast Name of contrast to visualize
 #' @param p_cutoff P-value cutoff for significance (default: 0.05)
 #' @param label_genes Whether to label top genes (default: TRUE)
@@ -513,42 +513,42 @@ plot_enrichment_dotplot <- function(tidyrna_object,
 #' @return A ggplot2 object (or plotly object if interactive = TRUE)
 #'
 #' @export
-plot_ma <- function(tidyrna_object,
+plot_ma <- function(tidyseq_object,
                      contrast,
                      p_cutoff = 0.05,
                      label_genes = TRUE,
                      n_labels = 10,
                      interactive = FALSE) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if DE results are available
-  if (is.null(tidyrna_object$de_results) || length(tidyrna_object$de_results) == 0) {
+  if (is.null(tidyseq_object$de_results) || length(tidyseq_object$de_results) == 0) {
     stop("No DE results found. Run run_de_analysis() first.")
   }
   
   # Check if specified contrast exists
-  if (!contrast %in% names(tidyrna_object$de_results)) {
+  if (!contrast %in% names(tidyseq_object$de_results)) {
     stop("Specified contrast not found: ", contrast)
   }
   
   # Log MA plot creation
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Generating MA plot for contrast: ", contrast),
     "log"
   )
   
   # Get DE results for the contrast
-  de_result <- tidyrna_object$de_results[[contrast]]
+  de_result <- tidyseq_object$de_results[[contrast]]
   
   # Calculate the mean expression if not available
   if (!"baseMean" %in% colnames(de_result)) {
     # If we don't have baseMean, calculate it from normalized counts
-    if (!is.null(tidyrna_object$normalized_counts)) {
-      counts <- tidyrna_object$normalized_counts
+    if (!is.null(tidyseq_object$normalized_counts)) {
+      counts <- tidyseq_object$normalized_counts
       de_result$baseMean <- rowMeans(counts[de_result$gene_id, ])
     } else {
       stop("Cannot create MA plot: baseMean not available in DE results and no normalized counts found")

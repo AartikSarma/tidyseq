@@ -10,7 +10,7 @@
 #' @param gene_column Column in counts data that identifies gene IDs (default: first column)
 #' @param validate_ids Whether to validate matching of sample IDs (default: TRUE)
 #'
-#' @return A tidyrna object with imported data
+#' @return A tidyseq object with imported data
 #'
 #' @export
 import_data <- function(counts_file, 
@@ -21,11 +21,11 @@ import_data <- function(counts_file,
                          gene_column = NULL,
                          validate_ids = TRUE) {
   
-  # Initialize tidyrna object
-  tidyrna_obj <- tidyrna()
+  # Initialize tidyseq object
+  tidyseq_obj <- tidyseq()
   
   # Import counts
-  tidyrna_obj <- add_message(tidyrna_obj, "Importing count data", "log")
+  tidyseq_obj <- add_message(tidyseq_obj, "Importing count data", "log")
   
   if (is.data.frame(counts_file) || is.matrix(counts_file)) {
     counts_data <- as.data.frame(counts_file)
@@ -53,7 +53,7 @@ import_data <- function(counts_file,
   }
   
   # Import metadata
-  tidyrna_obj <- add_message(tidyrna_obj, "Importing metadata", "log")
+  tidyseq_obj <- add_message(tidyseq_obj, "Importing metadata", "log")
   
   if (is.data.frame(metadata_file)) {
     metadata_data <- metadata_file
@@ -83,8 +83,8 @@ import_data <- function(counts_file,
   # Identify sample column in metadata if not specified
   if (is.null(sample_column)) {
     sample_column <- colnames(metadata_data)[1]
-    tidyrna_obj <- add_message(
-      tidyrna_obj, 
+    tidyseq_obj <- add_message(
+      tidyseq_obj, 
       paste0("Sample column not specified, using first column: '", sample_column, "'"),
       "log"
     )
@@ -95,7 +95,7 @@ import_data <- function(counts_file,
   
   # Validate matching of sample IDs
   if (validate_ids) {
-    tidyrna_obj <- add_message(tidyrna_obj, "Validating sample IDs", "log")
+    tidyseq_obj <- add_message(tidyseq_obj, "Validating sample IDs", "log")
     
     # Get sample IDs from counts data
     count_samples <- colnames(counts_data)
@@ -110,7 +110,7 @@ import_data <- function(counts_file,
         "The following samples are in metadata but missing in counts data: ",
         paste(missing_in_counts, collapse = ", ")
       )
-      tidyrna_obj <- add_message(tidyrna_obj, warning_msg, "warning")
+      tidyseq_obj <- add_message(tidyseq_obj, warning_msg, "warning")
     }
     
     # Check for missing samples in metadata
@@ -120,7 +120,7 @@ import_data <- function(counts_file,
         "The following samples are in counts data but missing in metadata: ",
         paste(missing_in_metadata, collapse = ", ")
       )
-      tidyrna_obj <- add_message(tidyrna_obj, warning_msg, "warning")
+      tidyseq_obj <- add_message(tidyseq_obj, warning_msg, "warning")
     }
     
     # If no common samples, stop
@@ -134,52 +134,52 @@ import_data <- function(counts_file,
     metadata_data <- metadata_data[common_samples, , drop = FALSE]
   }
   
-  # Store in tidyrna object
-  tidyrna_obj$raw_counts <- counts_data
-  tidyrna_obj$metadata <- metadata_data
+  # Store in tidyseq object
+  tidyseq_obj$raw_counts <- counts_data
+  tidyseq_obj$metadata <- metadata_data
   
-  tidyrna_obj <- add_message(
-    tidyrna_obj, 
+  tidyseq_obj <- add_message(
+    tidyseq_obj, 
     paste0("Imported ", nrow(counts_data), " genes and ", ncol(counts_data), " samples"),
     "log"
   )
   
-  return(tidyrna_obj)
+  return(tidyseq_obj)
 }
 
 #' Filter low-count genes from RNA-Seq data
 #'
 #' @description Remove genes with low counts across samples
 #'
-#' @param tidyrna_object A tidyrna object with raw counts
+#' @param tidyseq_object A tidyseq object with raw counts
 #' @param min_count Minimum count required in at least min_samples samples (default: 10)
 #' @param min_samples Minimum number of samples that must have min_count (default: 2)
 #' @param count_type Whether to filter on raw or CPM values (default: "raw")
 #'
-#' @return A tidyrna object with filtered counts
+#' @return A tidyseq object with filtered counts
 #'
 #' @export
-filter_low_counts <- function(tidyrna_object, 
+filter_low_counts <- function(tidyseq_object, 
                                min_count = 10, 
                                min_samples = 2,
                                count_type = "raw") {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
-  if (is.null(tidyrna_object$raw_counts)) {
-    stop("No raw counts found in tidyrna object. Run import_data() first.")
+  if (is.null(tidyseq_object$raw_counts)) {
+    stop("No raw counts found in tidyseq object. Run import_data() first.")
   }
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Filtering low-count genes (min_count=", min_count, 
            ", min_samples=", min_samples, ", count_type=", count_type, ")"),
     "log"
   )
   
-  counts <- tidyrna_object$raw_counts
+  counts <- tidyseq_object$raw_counts
   
   # Convert to CPM if specified
   if (count_type == "cpm") {
@@ -201,10 +201,10 @@ filter_low_counts <- function(tidyrna_object,
   filtered_counts <- counts[keep, , drop = FALSE]
   
   # Store results
-  tidyrna_object$filtered_counts <- filtered_counts
+  tidyseq_object$filtered_counts <- filtered_counts
   
   # Store parameters
-  tidyrna_object$parameters$filtering <- list(
+  tidyseq_object$parameters$filtering <- list(
     min_count = min_count,
     min_samples = min_samples,
     count_type = count_type
@@ -214,55 +214,55 @@ filter_low_counts <- function(tidyrna_object,
   genes_removed <- nrow(counts) - nrow(filtered_counts)
   genes_kept <- nrow(filtered_counts)
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Removed ", genes_removed, " low-count genes (", 
            round(genes_removed/nrow(counts)*100, 1), "%). Kept ", 
            genes_kept, " genes."),
     "log"
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Normalize RNA-Seq count data
 #'
 #' @description Normalize RNA-Seq count data using various methods
 #'
-#' @param tidyrna_object A tidyrna object with raw or filtered counts
+#' @param tidyseq_object A tidyseq object with raw or filtered counts
 #' @param method Normalization method. One of "DESeq2", "TMM", "RLE", "CPM", or "TPM" (default: "DESeq2")
 #' @param use_filtered Whether to use filtered counts (default: TRUE)
 #' @param design Formula specifying the design for DESeq2 normalization (default: ~ 1)
 #' @param gene_lengths Vector of gene lengths (required for TPM normalization)
 #'
-#' @return A tidyrna object with normalized counts
+#' @return A tidyseq object with normalized counts
 #'
 #' @export
-normalize_counts <- function(tidyrna_object,
+normalize_counts <- function(tidyseq_object,
                               method = "DESeq2",
                               use_filtered = TRUE,
                               design = ~ 1,
                               gene_lengths = NULL) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if counts are available
   if (use_filtered) {
-    if (is.null(tidyrna_object$filtered_counts)) {
-      stop("No filtered counts found in tidyrna object. Run filter_low_counts() first.")
+    if (is.null(tidyseq_object$filtered_counts)) {
+      stop("No filtered counts found in tidyseq object. Run filter_low_counts() first.")
     }
-    counts <- tidyrna_object$filtered_counts
+    counts <- tidyseq_object$filtered_counts
   } else {
-    if (is.null(tidyrna_object$raw_counts)) {
-      stop("No raw counts found in tidyrna object. Run import_data() first.")
+    if (is.null(tidyseq_object$raw_counts)) {
+      stop("No raw counts found in tidyseq object. Run import_data() first.")
     }
-    counts <- tidyrna_object$raw_counts
+    counts <- tidyseq_object$raw_counts
   }
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Normalizing counts with method: ", method),
     "log"
   )
@@ -270,7 +270,7 @@ normalize_counts <- function(tidyrna_object,
   # Normalize based on method
   if (method == "DESeq2") {
     # Check if metadata is available
-    if (is.null(tidyrna_object$metadata)) {
+    if (is.null(tidyseq_object$metadata)) {
       stop("Metadata is required for DESeq2 normalization. Run import_data() first.")
     }
     
@@ -278,7 +278,7 @@ normalize_counts <- function(tidyrna_object,
     library(DESeq2)
     dds <- DESeq2::DESeqDataSetFromMatrix(
       countData = counts,
-      colData = tidyrna_object$metadata,
+      colData = tidyseq_object$metadata,
       design = design
     )
     
@@ -289,7 +289,7 @@ normalize_counts <- function(tidyrna_object,
     normalized_counts <- DESeq2::counts(dds, normalized = TRUE)
     
     # Store DESeq2 object for later use
-    tidyrna_object$deseq2_object <- dds
+    tidyseq_object$deseq2_object <- dds
     
   } else if (method == "TMM") {
     # TMM normalization with edgeR
@@ -301,7 +301,7 @@ normalize_counts <- function(tidyrna_object,
     normalized_counts <- edgeR::cpm(dge, log = FALSE) * 1e6
     
     # Store edgeR object for later use
-    tidyrna_object$edger_object <- dge
+    tidyseq_object$edger_object <- dge
     
   } else if (method == "RLE") {
     # RLE normalization with edgeR
@@ -340,20 +340,20 @@ normalize_counts <- function(tidyrna_object,
   }
   
   # Store results
-  tidyrna_object$normalized_counts <- normalized_counts
-  tidyrna_object$normalization_method <- method
+  tidyseq_object$normalized_counts <- normalized_counts
+  tidyseq_object$normalization_method <- method
   
   # Store parameters
-  tidyrna_object$parameters$normalization <- list(
+  tidyseq_object$parameters$normalization <- list(
     method = method,
     use_filtered = use_filtered
   )
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Normalized ", nrow(normalized_counts), " genes using ", method, " method"),
     "log"
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }

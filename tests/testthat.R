@@ -1,4 +1,4 @@
 library(testthat)
-library(tidyrna)
+library(tidyseq)
 
-test_check("tidyrna")
+test_check("tidyseq")

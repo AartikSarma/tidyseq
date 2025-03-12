@@ -1,12 +1,12 @@
-#' TidyRNA: User-Friendly RNA-Seq Analysis for Researchers with Limited Programming Experience
+#' TidySeq: User-Friendly RNA-Seq Analysis for Researchers with Limited Programming Experience
 #'
-#' @description TidyRNA simplifies RNA-Seq analysis for researchers with limited 
+#' @description TidySeq simplifies RNA-Seq analysis for researchers with limited 
 #' programming experience. It provides a streamlined workflow for data import, 
 #' quality control, normalization, differential expression analysis, pathway 
 #' enrichment, and visualization with robust error handling and guidance.
 #'
 #' @docType package
-#' @name tidyrna-package
+#' @name tidyseq-package
 NULL
 
 #' Complete RNA-Seq analysis workflow in one function
@@ -24,7 +24,7 @@ NULL
 #' @param enrich_params List of parameters for enrichment analysis (optional)
 #' @param create_reports Whether to create HTML reports (default: TRUE)
 #'
-#' @return A tidyrna object with all analysis results
+#' @return A tidyseq object with all analysis results
 #'
 #' @examples
 #' \dontrun{
@@ -55,38 +55,38 @@ run_rnaseq_workflow <- function(counts_file,
                                  metadata_file,
                                  condition_column,
                                  reference_level = NULL,
-                                 output_dir = "tidyrna_results",
+                                 output_dir = "tidyseq_results",
                                  filter_params = list(),
                                  norm_params = list(),
                                  de_params = list(),
                                  enrich_params = list(),
                                  create_reports = TRUE) {
   
-  # Start TidyRNA analysis
-  tidyrna_obj <- tidyrna()
+  # Start TidySeq analysis
+  tidyseq_obj <- tidyseq()
   
   # Add initial log message
-  tidyrna_obj <- add_message(
-    tidyrna_obj, 
-    "Starting TidyRNA analysis workflow",
+  tidyseq_obj <- add_message(
+    tidyseq_obj, 
+    "Starting TidySeq analysis workflow",
     "log"
   )
   
   # Step 1: Import data
-  tidyrna_obj <- add_message(
-    tidyrna_obj, 
+  tidyseq_obj <- add_message(
+    tidyseq_obj, 
     "STEP 1: Importing count data and metadata",
     "log"
   )
   
-  tidyrna_obj <- import_data(
+  tidyseq_obj <- import_data(
     counts_file = counts_file,
     metadata_file = metadata_file
   )
   
   # Step 2: Filter low-count genes
-  tidyrna_obj <- add_message(
-    tidyrna_obj, 
+  tidyseq_obj <- add_message(
+    tidyseq_obj, 
     "STEP 2: Filtering low-count genes",
     "log"
   )
@@ -102,11 +102,11 @@ run_rnaseq_workflow <- function(counts_file,
   filter_args <- modifyList(filter_defaults, filter_params)
   
   # Run filtering
-  tidyrna_obj <- do.call(filter_low_counts, c(list(tidyrna_object = tidyrna_obj), filter_args))
+  tidyseq_obj <- do.call(filter_low_counts, c(list(tidyseq_object = tidyseq_obj), filter_args))
   
   # Step 3: Normalize counts
-  tidyrna_obj <- add_message(
-    tidyrna_obj, 
+  tidyseq_obj <- add_message(
+    tidyseq_obj, 
     "STEP 3: Normalizing count data",
     "log"
   )
@@ -121,24 +121,24 @@ run_rnaseq_workflow <- function(counts_file,
   norm_args <- modifyList(norm_defaults, norm_params)
   
   # Run normalization
-  tidyrna_obj <- do.call(normalize_counts, c(list(tidyrna_object = tidyrna_obj), norm_args))
+  tidyseq_obj <- do.call(normalize_counts, c(list(tidyseq_object = tidyseq_obj), norm_args))
   
   # Step 4: Create contrasts for DE analysis
-  tidyrna_obj <- add_message(
-    tidyrna_obj, 
+  tidyseq_obj <- add_message(
+    tidyseq_obj, 
     "STEP 4: Creating DE contrasts",
     "log"
   )
   
-  tidyrna_obj <- create_de_contrasts(
-    tidyrna_object = tidyrna_obj,
+  tidyseq_obj <- create_de_contrasts(
+    tidyseq_object = tidyseq_obj,
     condition_column = condition_column,
     reference_level = reference_level
   )
   
   # Step 5: Run DE analysis
-  tidyrna_obj <- add_message(
-    tidyrna_obj, 
+  tidyseq_obj <- add_message(
+    tidyseq_obj, 
     "STEP 5: Running differential expression analysis",
     "log"
   )
@@ -156,7 +156,7 @@ run_rnaseq_workflow <- function(counts_file,
   de_args <- modifyList(de_defaults, de_params)
   
   # Run DE analysis
-  tidyrna_obj <- do.call(run_de_analysis, c(list(tidyrna_object = tidyrna_obj), de_args))
+  tidyseq_obj <- do.call(run_de_analysis, c(list(tidyseq_object = tidyseq_obj), de_args))
   
   # Step 6: Run enrichment analysis
   # Check if enrichment analysis is requested
@@ -166,8 +166,8 @@ run_rnaseq_workflow <- function(counts_file,
   run_gsea <- is.null(enrich_params$run_gsea) || enrich_params$run_gsea
   
   if (run_enrichment) {
-    tidyrna_obj <- add_message(
-      tidyrna_obj, 
+    tidyseq_obj <- add_message(
+      tidyseq_obj, 
       "STEP 6: Running functional enrichment analysis",
       "log"
     )
@@ -185,42 +185,42 @@ run_rnaseq_workflow <- function(counts_file,
     
     # Run GO enrichment if requested
     if (run_go) {
-      tidyrna_obj <- add_message(
-        tidyrna_obj, 
+      tidyseq_obj <- add_message(
+        tidyseq_obj, 
         "Running GO enrichment analysis",
         "log"
       )
       
-      tidyrna_obj <- do.call(run_go_enrichment, c(list(tidyrna_object = tidyrna_obj), enrich_args))
+      tidyseq_obj <- do.call(run_go_enrichment, c(list(tidyseq_object = tidyseq_obj), enrich_args))
     }
     
     # Run KEGG enrichment if requested
     if (run_kegg) {
-      tidyrna_obj <- add_message(
-        tidyrna_obj, 
+      tidyseq_obj <- add_message(
+        tidyseq_obj, 
         "Running KEGG pathway enrichment analysis",
         "log"
       )
       
-      tidyrna_obj <- do.call(run_kegg_enrichment, c(list(tidyrna_object = tidyrna_obj), enrich_args))
+      tidyseq_obj <- do.call(run_kegg_enrichment, c(list(tidyseq_object = tidyseq_obj), enrich_args))
     }
     
     # Run GSEA if requested
     if (run_gsea) {
-      tidyrna_obj <- add_message(
-        tidyrna_obj, 
+      tidyseq_obj <- add_message(
+        tidyseq_obj, 
         "Running Gene Set Enrichment Analysis (GSEA)",
         "log"
       )
       
-      tidyrna_obj <- do.call(run_gsea, c(list(tidyrna_object = tidyrna_obj), enrich_args))
+      tidyseq_obj <- do.call(run_gsea, c(list(tidyseq_object = tidyseq_obj), enrich_args))
     }
   }
   
   # Step 7: Create reports
   if (create_reports) {
-    tidyrna_obj <- add_message(
-      tidyrna_obj, 
+    tidyseq_obj <- add_message(
+      tidyseq_obj, 
       "STEP 7: Creating analysis reports",
       "log"
     )
@@ -231,55 +231,55 @@ run_rnaseq_workflow <- function(counts_file,
     }
     
     # Create QC report
-    tidyrna_obj <- create_qc_report(
-      tidyrna_object = tidyrna_obj,
+    tidyseq_obj <- create_qc_report(
+      tidyseq_object = tidyseq_obj,
       output_dir = output_dir
     )
     
     # Create DE report
-    tidyrna_obj <- create_de_report(
-      tidyrna_object = tidyrna_obj,
+    tidyseq_obj <- create_de_report(
+      tidyseq_object = tidyseq_obj,
       output_dir = output_dir
     )
     
     # Create enrichment report if enrichment was performed
-    if (run_enrichment && length(tidyrna_obj$enrichment_results) > 0) {
-      tidyrna_obj <- create_enrichment_report(
-        tidyrna_object = tidyrna_obj,
+    if (run_enrichment && length(tidyseq_obj$enrichment_results) > 0) {
+      tidyseq_obj <- create_enrichment_report(
+        tidyseq_object = tidyseq_obj,
         output_dir = output_dir
       )
     }
     
     # Create full report
-    tidyrna_obj <- create_full_report(
-      tidyrna_object = tidyrna_obj,
+    tidyseq_obj <- create_full_report(
+      tidyseq_object = tidyseq_obj,
       output_dir = output_dir
     )
   }
   
   # Add final log message
-  tidyrna_obj <- add_message(
-    tidyrna_obj, 
-    "TidyRNA analysis workflow completed successfully",
+  tidyseq_obj <- add_message(
+    tidyseq_obj, 
+    "TidySeq analysis workflow completed successfully",
     "log"
   )
   
-  return(tidyrna_obj)
+  return(tidyseq_obj)
 }
 
-#' Save TidyRNA analysis results
+#' Save TidySeq analysis results
 #'
-#' @description Save a TidyRNA object to a file for later use
+#' @description Save a TidySeq object to a file for later use
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param file_path Path to save the object
 #'
 #' @return Invisibly returns the file path
 #'
 #' @export
-save_analysis <- function(tidyrna_object, file_path) {
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+save_analysis <- function(tidyseq_object, file_path) {
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Create directory if it doesn't exist
@@ -289,25 +289,25 @@ save_analysis <- function(tidyrna_object, file_path) {
   }
   
   # Save the object
-  saveRDS(tidyrna_object, file = file_path)
+  saveRDS(tidyseq_object, file = file_path)
   
   # Log message
-  tidyrna_object <- add_message(
-    tidyrna_object, 
-    paste0("TidyRNA analysis saved to: ", file_path),
+  tidyseq_object <- add_message(
+    tidyseq_object, 
+    paste0("TidySeq analysis saved to: ", file_path),
     "log"
   )
   
   return(invisible(file_path))
 }
 
-#' Load TidyRNA analysis results
+#' Load TidySeq analysis results
 #'
-#' @description Load a TidyRNA object from a file
+#' @description Load a TidySeq object from a file
 #'
-#' @param file_path Path to the saved tidyrna object
+#' @param file_path Path to the saved tidyseq object
 #'
-#' @return A tidyrna object
+#' @return A tidyseq object
 #'
 #' @export
 load_analysis <- function(file_path) {
@@ -316,19 +316,19 @@ load_analysis <- function(file_path) {
   }
   
   # Load the object
-  tidyrna_object <- readRDS(file_path)
+  tidyseq_object <- readRDS(file_path)
   
-  # Verify it's a tidyrna object
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Loaded object is not of class 'tidyrna'")
+  # Verify it's a tidyseq object
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Loaded object is not of class 'tidyseq'")
   }
   
   # Add log message
-  tidyrna_object <- add_message(
-    tidyrna_object, 
-    paste0("TidyRNA analysis loaded from: ", file_path),
+  tidyseq_object <- add_message(
+    tidyseq_object, 
+    paste0("TidySeq analysis loaded from: ", file_path),
     "log"
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }

@@ -1,13 +1,13 @@
-#' TidyRNA Class
+#' TidySeq Class
 #'
 #' @description An S3 class to store RNA-Seq analysis data and results
 #'
-#' @details The tidyrna object stores all data and results from the RNA-Seq analysis workflow,
+#' @details The tidyseq object stores all data and results from the RNA-Seq analysis workflow,
 #' including count data, metadata, normalization results, differential expression results,
 #' and enrichment results.
 #'
 #' @export
-tidyrna <- function() {
+tidyseq <- function() {
   structure(
     list(
       # Data components
@@ -36,18 +36,18 @@ tidyrna <- function() {
       warnings = character(),
       errors = character()
     ),
-    class = "tidyrna"
+    class = "tidyseq"
   )
 }
 
-#' Print method for tidyrna objects
+#' Print method for tidyseq objects
 #'
-#' @param x A tidyrna object
+#' @param x A tidyseq object
 #' @param ... Additional arguments (not used)
 #'
 #' @export
-print.tidyrna <- function(x, ...) {
-  cat("TidyRNA object\n")
+print.tidyseq <- function(x, ...) {
+  cat("TidySeq object\n")
   cat("==============\n\n")
   
   # Data components
@@ -110,13 +110,13 @@ print.tidyrna <- function(x, ...) {
   }
 }
 
-#' Summary method for tidyrna objects
+#' Summary method for tidyseq objects
 #'
-#' @param object A tidyrna object
+#' @param object A tidyseq object
 #' @param ... Additional arguments (not used)
 #'
 #' @export
-summary.tidyrna <- function(object, ...) {
+summary.tidyseq <- function(object, ...) {
   print(object)
   
   # Add additional summary information here as needed
@@ -139,38 +139,38 @@ summary.tidyrna <- function(object, ...) {
   }
 }
 
-#' Get method for tidyrna objects
+#' Get method for tidyseq objects
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param component The component to retrieve
 #'
-#' @return The requested component from the tidyrna object
+#' @return The requested component from the tidyseq object
 #'
 #' @export
-get_component <- function(tidyrna_object, component) {
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+get_component <- function(tidyseq_object, component) {
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
-  if (!component %in% names(tidyrna_object)) {
-    stop("Component '", component, "' not found in tidyrna object")
+  if (!component %in% names(tidyseq_object)) {
+    stop("Component '", component, "' not found in tidyseq object")
   }
   
-  return(tidyrna_object[[component]])
+  return(tidyseq_object[[component]])
 }
 
-#' Add log message to tidyrna object
+#' Add log message to tidyseq object
 #'
-#' @param tidyrna_object A tidyrna object
+#' @param tidyseq_object A tidyseq object
 #' @param message The message to add to the log
 #' @param type The type of message (log, message, warning, error)
 #'
-#' @return Updated tidyrna object with added message
+#' @return Updated tidyseq object with added message
 #'
 #' @export
-add_message <- function(tidyrna_object, message, type = "log") {
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+add_message <- function(tidyseq_object, message, type = "log") {
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   if (!type %in% c("log", "message", "warning", "error")) {
@@ -180,7 +180,7 @@ add_message <- function(tidyrna_object, message, type = "log") {
   timestamp <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
   formatted_message <- paste0("[", timestamp, "] ", message)
   
-  tidyrna_object[[type]] <- c(tidyrna_object[[type]], formatted_message)
+  tidyseq_object[[type]] <- c(tidyseq_object[[type]], formatted_message)
   
   if (type %in% c("warning", "error")) {
     if (type == "warning") {
@@ -190,5 +190,5 @@ add_message <- function(tidyrna_object, message, type = "log") {
     }
   }
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }

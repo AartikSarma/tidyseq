@@ -1,9 +1,9 @@
-Package: tidyrna
+Package: tidyseq
 Title: User-Friendly RNA-Seq Analysis for Researchers with Limited Programming Experience
 Version: 0.1.0
 Authors@R: 
     person("Your", "Name", email = "your.email@example.com", role = c("aut", "cre"))
-Description: TidyRNA simplifies RNA-Seq analysis for researchers with limited 
+Description: TidySeq simplifies RNA-Seq analysis for researchers with limited 
     programming experience. It provides a streamlined workflow for data import, 
     quality control, normalization, differential expression analysis, pathway 
     enrichment, and visualization with robust error handling and guidance.

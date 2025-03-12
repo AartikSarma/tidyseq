@@ -1,6 +1,6 @@
-# TidyRNA: User-Friendly RNA-Seq Analysis for Researchers with Limited Programming Experience
+# TidySeq: User-Friendly RNA-Seq Analysis for Researchers with Limited Programming Experience
 
-TidyRNA is an R package designed to simplify RNA-Seq analysis for researchers with limited programming experience. It provides a streamlined workflow for data import, quality control, normalization, differential expression analysis, pathway enrichment, and visualization with robust error handling and guidance.
+TidySeq is an R package designed to simplify RNA-Seq analysis for researchers with limited programming experience. It provides a streamlined workflow for data import, quality control, normalization, differential expression analysis, pathway enrichment, and visualization with robust error handling and guidance.
 
 ## Features
 
@@ -19,14 +19,14 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
   install.packages("devtools")
 }
 
-# Install TidyRNA from GitHub
-devtools::install_github("yourusername/tidyrna")
+# Install TidySeq from GitHub
+devtools::install_github("yourusername/tidyseq")
 ```
 
 ## Quick Start
 
 ```r
-library(tidyrna)
+library(tidyseq)
 
 # Run complete analysis workflow
 results <- run_rnaseq_workflow(
@@ -43,8 +43,8 @@ print(results)
 ## Step-by-Step Analysis
 
 ```r
-# Create a tidyrna object
-rnaseq <- tidyrna()
+# Create a tidyseq object
+rnaseq <- tidyseq()
 
 # Import data
 rnaseq <- import_data(
@@ -134,12 +134,12 @@ rnaseq <- create_full_report(
 For more information, please refer to the package vignettes:
 
 ```r
-browseVignettes("tidyrna")
+browseVignettes("tidyseq")
 ```
 
 ## Contribution
 
-Contributions to TidyRNA are welcome! Please feel free to submit a pull request or open an issue on GitHub.
+Contributions to TidySeq are welcome! Please feel free to submit a pull request or open an issue on GitHub.
 
 ## License
 

@@ -2,7 +2,7 @@
 #'
 #' @description Perform Gene Ontology enrichment analysis on differential expression results
 #'
-#' @param tidyrna_object A tidyrna object with DE results
+#' @param tidyseq_object A tidyseq object with DE results
 #' @param contrasts Contrasts to analyze (default: all)
 #' @param ont GO ontology to test. One of "BP", "MF", "CC", or "ALL" (default: "ALL")
 #' @param organism Organism for annotation. KEGG organism code or common name (default: "hsa")
@@ -12,10 +12,10 @@
 #' @param min_gs_size Minimum gene set size (default: 10)
 #' @param max_gs_size Maximum gene set size (default: 500)
 #'
-#' @return A tidyrna object with GO enrichment results
+#' @return A tidyseq object with GO enrichment results
 #'
 #' @export
-run_go_enrichment <- function(tidyrna_object,
+run_go_enrichment <- function(tidyseq_object,
                                contrasts = NULL,
                                ont = "ALL",
                                organism = "hsa",
@@ -25,28 +25,28 @@ run_go_enrichment <- function(tidyrna_object,
                                min_gs_size = 10,
                                max_gs_size = 500) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if DE results are available
-  if (length(tidyrna_object$de_results) == 0) {
+  if (length(tidyseq_object$de_results) == 0) {
     stop("No differential expression results found. Run run_de_analysis() first.")
   }
   
   # Use all contrasts if not specified
   if (is.null(contrasts)) {
-    contrasts <- names(tidyrna_object$de_results)
+    contrasts <- names(tidyseq_object$de_results)
   } else {
     # Check if specified contrasts exist
-    missing_contrasts <- setdiff(contrasts, names(tidyrna_object$de_results))
+    missing_contrasts <- setdiff(contrasts, names(tidyseq_object$de_results))
     if (length(missing_contrasts) > 0) {
       stop("Specified contrasts not found: ", paste(missing_contrasts, collapse = ", "))
     }
   }
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Running GO enrichment analysis for ", length(contrasts), " contrasts"),
     "log"
   )
@@ -55,27 +55,27 @@ run_go_enrichment <- function(tidyrna_object,
   library(clusterProfiler)
   
   # Initialize results list if not present
-  if (is.null(tidyrna_object$enrichment_results)) {
-    tidyrna_object$enrichment_results <- list()
+  if (is.null(tidyseq_object$enrichment_results)) {
+    tidyseq_object$enrichment_results <- list()
   }
   
   # Process each contrast
   for (contrast in contrasts) {
-    tidyrna_object <- add_message(
-      tidyrna_object, 
+    tidyseq_object <- add_message(
+      tidyseq_object, 
       paste0("Running GO enrichment for contrast: ", contrast),
       "log"
     )
     
     # Get DE results
-    de_result <- tidyrna_object$de_results[[contrast]]
+    de_result <- tidyseq_object$de_results[[contrast]]
     
     # Get significant genes
     sig_genes <- de_result$gene_id[de_result$padj < p_cutoff]
     
     if (length(sig_genes) == 0) {
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("No significant genes found for contrast ", contrast, ". Skipping GO enrichment."),
         "warning"
       )
@@ -115,8 +115,8 @@ run_go_enrichment <- function(tidyrna_object,
     ontologies <- if (ont == "ALL") c("BP", "MF", "CC") else ont
     
     for (current_ont in ontologies) {
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Running ", current_ont, " ontology enrichment for contrast: ", contrast),
         "log"
       )
@@ -140,14 +140,14 @@ run_go_enrichment <- function(tidyrna_object,
       
       # Log result summary
       if (length(go_result@result$ID) > 0) {
-        tidyrna_object <- add_message(
-          tidyrna_object, 
+        tidyseq_object <- add_message(
+          tidyseq_object, 
           paste0("Found ", length(go_result@result$ID), " enriched ", current_ont, " terms for contrast ", contrast),
           "log"
         )
       } else {
-        tidyrna_object <- add_message(
-          tidyrna_object, 
+        tidyseq_object <- add_message(
+          tidyseq_object, 
           paste0("No enriched ", current_ont, " terms found for contrast ", contrast),
           "log"
         )
@@ -155,11 +155,11 @@ run_go_enrichment <- function(tidyrna_object,
     }
     
     # Store all GO results for this contrast
-    tidyrna_object$enrichment_results[[paste0(contrast, "_go")]] <- go_results
+    tidyseq_object$enrichment_results[[paste0(contrast, "_go")]] <- go_results
   }
   
   # Store enrichment parameters
-  tidyrna_object$parameters$go_enrichment <- list(
+  tidyseq_object$parameters$go_enrichment <- list(
     ont = ont,
     organism = organism,
     gene_id_type = gene_id_type,
@@ -169,14 +169,14 @@ run_go_enrichment <- function(tidyrna_object,
     max_gs_size = max_gs_size
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Run KEGG pathway enrichment analysis
 #'
 #' @description Perform KEGG pathway enrichment analysis on differential expression results
 #'
-#' @param tidyrna_object A tidyrna object with DE results
+#' @param tidyseq_object A tidyseq object with DE results
 #' @param contrasts Contrasts to analyze (default: all)
 #' @param organism Organism for KEGG. KEGG organism code (default: "hsa")
 #' @param gene_id_type Type of gene IDs. One of "ENSEMBL", "ENTREZID", "SYMBOL", etc. (default: "ENSEMBL")
@@ -185,10 +185,10 @@ run_go_enrichment <- function(tidyrna_object,
 #' @param min_gs_size Minimum gene set size (default: 10)
 #' @param max_gs_size Maximum gene set size (default: 500)
 #'
-#' @return A tidyrna object with KEGG enrichment results
+#' @return A tidyseq object with KEGG enrichment results
 #'
 #' @export
-run_kegg_enrichment <- function(tidyrna_object,
+run_kegg_enrichment <- function(tidyseq_object,
                                  contrasts = NULL,
                                  organism = "hsa",
                                  gene_id_type = "ENSEMBL",
@@ -197,28 +197,28 @@ run_kegg_enrichment <- function(tidyrna_object,
                                  min_gs_size = 10,
                                  max_gs_size = 500) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if DE results are available
-  if (length(tidyrna_object$de_results) == 0) {
+  if (length(tidyseq_object$de_results) == 0) {
     stop("No differential expression results found. Run run_de_analysis() first.")
   }
   
   # Use all contrasts if not specified
   if (is.null(contrasts)) {
-    contrasts <- names(tidyrna_object$de_results)
+    contrasts <- names(tidyseq_object$de_results)
   } else {
     # Check if specified contrasts exist
-    missing_contrasts <- setdiff(contrasts, names(tidyrna_object$de_results))
+    missing_contrasts <- setdiff(contrasts, names(tidyseq_object$de_results))
     if (length(missing_contrasts) > 0) {
       stop("Specified contrasts not found: ", paste(missing_contrasts, collapse = ", "))
     }
   }
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Running KEGG enrichment analysis for ", length(contrasts), " contrasts"),
     "log"
   )
@@ -227,27 +227,27 @@ run_kegg_enrichment <- function(tidyrna_object,
   library(clusterProfiler)
   
   # Initialize results list if not present
-  if (is.null(tidyrna_object$enrichment_results)) {
-    tidyrna_object$enrichment_results <- list()
+  if (is.null(tidyseq_object$enrichment_results)) {
+    tidyseq_object$enrichment_results <- list()
   }
   
   # Process each contrast
   for (contrast in contrasts) {
-    tidyrna_object <- add_message(
-      tidyrna_object, 
+    tidyseq_object <- add_message(
+      tidyseq_object, 
       paste0("Running KEGG enrichment for contrast: ", contrast),
       "log"
     )
     
     # Get DE results
-    de_result <- tidyrna_object$de_results[[contrast]]
+    de_result <- tidyseq_object$de_results[[contrast]]
     
     # Get significant genes
     sig_genes <- de_result$gene_id[de_result$padj < p_cutoff]
     
     if (length(sig_genes) == 0) {
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("No significant genes found for contrast ", contrast, ". Skipping KEGG enrichment."),
         "warning"
       )
@@ -293,18 +293,18 @@ run_kegg_enrichment <- function(tidyrna_object,
     )
     
     # Store results
-    tidyrna_object$enrichment_results[[paste0(contrast, "_kegg")]] <- kegg_result
+    tidyseq_object$enrichment_results[[paste0(contrast, "_kegg")]] <- kegg_result
     
     # Log result summary
     if (length(kegg_result@result$ID) > 0) {
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Found ", length(kegg_result@result$ID), " enriched KEGG pathways for contrast ", contrast),
         "log"
       )
     } else {
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("No enriched KEGG pathways found for contrast ", contrast),
         "log"
       )
@@ -312,7 +312,7 @@ run_kegg_enrichment <- function(tidyrna_object,
   }
   
   # Store enrichment parameters
-  tidyrna_object$parameters$kegg_enrichment <- list(
+  tidyseq_object$parameters$kegg_enrichment <- list(
     organism = organism,
     gene_id_type = gene_id_type,
     p_cutoff = p_cutoff,
@@ -321,14 +321,14 @@ run_kegg_enrichment <- function(tidyrna_object,
     max_gs_size = max_gs_size
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }
 
 #' Run Gene Set Enrichment Analysis (GSEA)
 #'
 #' @description Perform Gene Set Enrichment Analysis on ranked gene lists
 #'
-#' @param tidyrna_object A tidyrna object with DE results
+#' @param tidyseq_object A tidyseq object with DE results
 #' @param contrasts Contrasts to analyze (default: all)
 #' @param gene_sets Gene sets to test. One of "GO", "KEGG", or a custom GMT file (default: "GO")
 #' @param organism Organism for annotation (default: "hsa")
@@ -338,10 +338,10 @@ run_kegg_enrichment <- function(tidyrna_object,
 #' @param min_gs_size Minimum gene set size (default: 10)
 #' @param max_gs_size Maximum gene set size (default: 500)
 #'
-#' @return A tidyrna object with GSEA results
+#' @return A tidyseq object with GSEA results
 #'
 #' @export
-run_gsea <- function(tidyrna_object,
+run_gsea <- function(tidyseq_object,
                       contrasts = NULL,
                       gene_sets = "GO",
                       organism = "hsa",
@@ -351,28 +351,28 @@ run_gsea <- function(tidyrna_object,
                       min_gs_size = 10,
                       max_gs_size = 500) {
   
-  if (!inherits(tidyrna_object, "tidyrna")) {
-    stop("Object must be of class 'tidyrna'")
+  if (!inherits(tidyseq_object, "tidyseq")) {
+    stop("Object must be of class 'tidyseq'")
   }
   
   # Check if DE results are available
-  if (length(tidyrna_object$de_results) == 0) {
+  if (length(tidyseq_object$de_results) == 0) {
     stop("No differential expression results found. Run run_de_analysis() first.")
   }
   
   # Use all contrasts if not specified
   if (is.null(contrasts)) {
-    contrasts <- names(tidyrna_object$de_results)
+    contrasts <- names(tidyseq_object$de_results)
   } else {
     # Check if specified contrasts exist
-    missing_contrasts <- setdiff(contrasts, names(tidyrna_object$de_results))
+    missing_contrasts <- setdiff(contrasts, names(tidyseq_object$de_results))
     if (length(missing_contrasts) > 0) {
       stop("Specified contrasts not found: ", paste(missing_contrasts, collapse = ", "))
     }
   }
   
-  tidyrna_object <- add_message(
-    tidyrna_object, 
+  tidyseq_object <- add_message(
+    tidyseq_object, 
     paste0("Running GSEA for ", length(contrasts), " contrasts"),
     "log"
   )
@@ -381,20 +381,20 @@ run_gsea <- function(tidyrna_object,
   library(clusterProfiler)
   
   # Initialize results list if not present
-  if (is.null(tidyrna_object$enrichment_results)) {
-    tidyrna_object$enrichment_results <- list()
+  if (is.null(tidyseq_object$enrichment_results)) {
+    tidyseq_object$enrichment_results <- list()
   }
   
   # Process each contrast
   for (contrast in contrasts) {
-    tidyrna_object <- add_message(
-      tidyrna_object, 
+    tidyseq_object <- add_message(
+      tidyseq_object, 
       paste0("Running GSEA for contrast: ", contrast),
       "log"
     )
     
     # Get DE results
-    de_result <- tidyrna_object$de_results[[contrast]]
+    de_result <- tidyseq_object$de_results[[contrast]]
     
     # Create ranked gene list
     if (rank_by == "pvalue") {
@@ -457,8 +457,8 @@ run_gsea <- function(tidyrna_object,
       
       # Process each ontology
       for (ont in c("BP", "MF", "CC")) {
-        tidyrna_object <- add_message(
-          tidyrna_object, 
+        tidyseq_object <- add_message(
+          tidyseq_object, 
           paste0("Running ", ont, " GSEA for contrast: ", contrast),
           "log"
         )
@@ -480,14 +480,14 @@ run_gsea <- function(tidyrna_object,
         
         # Log result summary
         if (nrow(gsea_result@result) > 0) {
-          tidyrna_object <- add_message(
-            tidyrna_object, 
+          tidyseq_object <- add_message(
+            tidyseq_object, 
             paste0("Found ", nrow(gsea_result@result), " enriched ", ont, " gene sets for contrast ", contrast),
             "log"
           )
         } else {
-          tidyrna_object <- add_message(
-            tidyrna_object, 
+          tidyseq_object <- add_message(
+            tidyseq_object, 
             paste0("No enriched ", ont, " gene sets found for contrast ", contrast),
             "log"
           )
@@ -495,12 +495,12 @@ run_gsea <- function(tidyrna_object,
       }
       
       # Store all GO GSEA results for this contrast
-      tidyrna_object$enrichment_results[[paste0(contrast, "_gsea_go")]] <- go_results
+      tidyseq_object$enrichment_results[[paste0(contrast, "_gsea_go")]] <- go_results
       
     } else if (gene_sets == "KEGG") {
       # Run KEGG GSEA
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Running KEGG GSEA for contrast: ", contrast),
         "log"
       )
@@ -516,18 +516,18 @@ run_gsea <- function(tidyrna_object,
       )
       
       # Store results
-      tidyrna_object$enrichment_results[[paste0(contrast, "_gsea_kegg")]] <- gsea_result
+      tidyseq_object$enrichment_results[[paste0(contrast, "_gsea_kegg")]] <- gsea_result
       
       # Log result summary
       if (nrow(gsea_result@result) > 0) {
-        tidyrna_object <- add_message(
-          tidyrna_object, 
+        tidyseq_object <- add_message(
+          tidyseq_object, 
           paste0("Found ", nrow(gsea_result@result), " enriched KEGG pathways for contrast ", contrast),
           "log"
         )
       } else {
-        tidyrna_object <- add_message(
-          tidyrna_object, 
+        tidyseq_object <- add_message(
+          tidyseq_object, 
           paste0("No enriched KEGG pathways found for contrast ", contrast),
           "log"
         )
@@ -535,8 +535,8 @@ run_gsea <- function(tidyrna_object,
       
     } else {
       # Custom gene sets from GMT file
-      tidyrna_object <- add_message(
-        tidyrna_object, 
+      tidyseq_object <- add_message(
+        tidyseq_object, 
         paste0("Running custom GSEA for contrast: ", contrast, " using ", gene_sets),
         "log"
       )
@@ -561,18 +561,18 @@ run_gsea <- function(tidyrna_object,
       )
       
       # Store results
-      tidyrna_object$enrichment_results[[paste0(contrast, "_gsea_custom")]] <- gsea_result
+      tidyseq_object$enrichment_results[[paste0(contrast, "_gsea_custom")]] <- gsea_result
       
       # Log result summary
       if (nrow(gsea_result@result) > 0) {
-        tidyrna_object <- add_message(
-          tidyrna_object, 
+        tidyseq_object <- add_message(
+          tidyseq_object, 
           paste0("Found ", nrow(gsea_result@result), " enriched gene sets for contrast ", contrast),
           "log"
         )
       } else {
-        tidyrna_object <- add_message(
-          tidyrna_object, 
+        tidyseq_object <- add_message(
+          tidyseq_object, 
           paste0("No enriched gene sets found for contrast ", contrast),
           "log"
         )
@@ -581,7 +581,7 @@ run_gsea <- function(tidyrna_object,
   }
   
   # Store GSEA parameters
-  tidyrna_object$parameters$gsea <- list(
+  tidyseq_object$parameters$gsea <- list(
     gene_sets = gene_sets,
     organism = organism,
     gene_id_type = gene_id_type,
@@ -591,5 +591,5 @@ run_gsea <- function(tidyrna_object,
     max_gs_size = max_gs_size
   )
   
-  return(tidyrna_object)
+  return(tidyseq_object)
 }

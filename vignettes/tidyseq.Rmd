@@ -1,10 +1,10 @@
 ---
-title: "Getting Started with TidyRNA"
+title: "Getting Started with TidySeq"
 author: "Your Name"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with TidyRNA}
+  %\VignetteIndexEntry{Getting Started with TidySeq}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -19,11 +19,11 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-TidyRNA is designed to make RNA-Seq analysis accessible to researchers with limited programming experience. This vignette demonstrates how to perform a complete RNA-Seq analysis workflow from data import to visualization and reporting.
+TidySeq is designed to make RNA-Seq analysis accessible to researchers with limited programming experience. This vignette demonstrates how to perform a complete RNA-Seq analysis workflow from data import to visualization and reporting.
 
 ## Installation
 
-You can install TidyRNA from GitHub:
+You can install TidySeq from GitHub:
 
 ```{r installation}
 # Install devtools if not already installed
@@ -31,11 +31,11 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
   install.packages("devtools")
 }
 
-# Install TidyRNA from GitHub
-devtools::install_github("yourusername/tidyrna")
+# Install TidySeq from GitHub
+devtools::install_github("yourusername/tidyseq")
 
 # Load the package
-library(tidyrna)
+library(tidyseq)
 ```
 
 ## Data Preparation
@@ -79,8 +79,8 @@ Alternatively, you can run each step individually for more control:
 ### 1. Import Data
 
 ```{r import_data}
-# Create a new TidyRNA object
-rnaseq <- tidyrna()
+# Create a new TidySeq object
+rnaseq <- tidyseq()
 
 # Import count data and metadata
 rnaseq <- import_data(
@@ -250,16 +250,16 @@ rnaseq <- create_full_report(
 ### 10. Save Analysis Results
 
 ```{r save_results}
-# Save TidyRNA object for later use
-save_analysis(rnaseq, "results/tidyrna_results.rds")
+# Save TidySeq object for later use
+save_analysis(rnaseq, "results/tidyseq_results.rds")
 
 # Load saved results
-reloaded_rnaseq <- load_analysis("results/tidyrna_results.rds")
+reloaded_rnaseq <- load_analysis("results/tidyseq_results.rds")
 ```
 
 ## Customizing Parameters
 
-TidyRNA provides sensible defaults for all parameters, but you can customize each step according to your needs.
+TidySeq provides sensible defaults for all parameters, but you can customize each step according to your needs.
 
 Here's an example of a more customized workflow:
 
@@ -298,6 +298,6 @@ custom_results <- run_rnaseq_workflow(
 
 ## Conclusion
 
-TidyRNA simplifies RNA-Seq analysis for researchers with limited programming experience while maintaining analytical rigor. By providing informative error messages, extensive validation, and intuitive visualizations, the package reduces technical barriers to RNA-Seq analysis while ensuring reproducibility.
+TidySeq simplifies RNA-Seq analysis for researchers with limited programming experience while maintaining analytical rigor. By providing informative error messages, extensive validation, and intuitive visualizations, the package reduces technical barriers to RNA-Seq analysis while ensuring reproducibility.
 
 For more information, please refer to the function documentation and additional vignettes.

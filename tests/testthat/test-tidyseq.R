@@ -1,12 +1,12 @@
 library(testthat)
-library(tidyrna)
+library(tidyseq)
 
-test_that("tidyrna object can be created", {
-  # Create a tidyrna object
-  obj <- tidyrna()
+test_that("tidyseq object can be created", {
+  # Create a tidyseq object
+  obj <- tidyseq()
   
   # Check that it has the correct class
-  expect_s3_class(obj, "tidyrna")
+  expect_s3_class(obj, "tidyseq")
   
   # Check that it has the expected structure
   expect_true(is.list(obj))
@@ -16,9 +16,9 @@ test_that("tidyrna object can be created", {
   expect_true(is.list(obj$enrichment_results))
 })
 
-test_that("add_message adds messages to tidyrna object", {
-  # Create a tidyrna object
-  obj <- tidyrna()
+test_that("add_message adds messages to tidyseq object", {
+  # Create a tidyseq object
+  obj <- tidyseq()
   
   # Add a log message
   obj <- add_message(obj, "Test log message", "log")
@@ -81,7 +81,7 @@ test_that("import_data imports data correctly", {
   )
   
   # Check that data was imported correctly
-  expect_s3_class(obj, "tidyrna")
+  expect_s3_class(obj, "tidyseq")
   expect_equal(dim(obj$raw_counts), c(20, 5))
   expect_equal(dim(obj$metadata), c(5, 3))
   expect_equal(colnames(obj$raw_counts), rownames(obj$metadata))
@@ -95,7 +95,7 @@ test_that("filter_low_counts filters genes correctly", {
   test_data <- create_test_data()
   
   # Create an object with data
-  obj <- tidyrna()
+  obj <- tidyseq()
   obj$raw_counts <- test_data$counts
   
   # Filter low-count genes
@@ -106,7 +106,7 @@ test_that("filter_low_counts filters genes correctly", {
   )
   
   # Check that genes were filtered correctly
-  expect_s3_class(obj, "tidyrna")
+  expect_s3_class(obj, "tidyseq")
   expect_true(nrow(obj$filtered_counts) <= nrow(obj$raw_counts))
 })
 
@@ -118,7 +118,7 @@ test_that("normalize_counts normalizes data correctly", {
   test_data <- create_test_data()
   
   # Create an object with data
-  obj <- tidyrna()
+  obj <- tidyseq()
   obj$raw_counts <- test_data$counts
   obj$metadata <- test_data$metadata
   obj$filtered_counts <- test_data$counts
@@ -137,7 +137,7 @@ test_that("normalize_counts normalizes data correctly", {
       )
       
       # Check that data was normalized correctly
-      expect_s3_class(obj, "tidyrna")
+      expect_s3_class(obj, "tidyseq")
       expect_equal(dim(obj$normalized_counts), c(20, 5))
       expect_equal(obj$normalization_method, "DESeq2")
     }
