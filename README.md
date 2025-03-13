@@ -1,6 +1,6 @@
-# TidySeq: User-Friendly RNA-Seq Analysis for Researchers with Limited Programming Experience
+# TidySeq: User-Friendly RNA-Seq Analysis for Researchers
 
-TidySeq is an R package designed to simplify RNA-Seq analysis for researchers with limited programming experience. It provides a streamlined workflow for data import, quality control, normalization, differential expression analysis, pathway enrichment, and visualization with robust error handling and guidance.
+TidySeq is an R package designed to simplify RNA-Seq analysis. It provides a streamlined workflow for data import, quality control, normalization, differential expression analysis, pathway enrichment, and visualization with robust error handling and guidance. 
 
 ## Features
 
@@ -21,7 +21,7 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 }
 
 # Install TidySeq from GitHub
-devtools::install_github("yourusername/tidyseq")
+devtools::install_github("AartikSarma/tidyseq")
 ```
 
 ## Quick Start
