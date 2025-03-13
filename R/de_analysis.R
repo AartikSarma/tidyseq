@@ -8,6 +8,7 @@
 #' @param contrasts List of manual contrasts as character vectors ("Group1-Group2")
 #' @param coef Coefficient numbers/names from design matrix to test (instead of contrasts)
 #' @param design_formula Design formula for the model (default: ~ condition)
+#' @param explain Whether to show explanation for this function (default: use global setting)
 #'
 #' @return A tidyseq object with contrast specifications
 #'
@@ -17,7 +18,50 @@ create_de_contrasts <- function(tidyseq_object,
                                  reference_level = NULL,
                                  contrasts = NULL,
                                  coef = NULL,
-                                 design_formula = NULL) {
+                                 design_formula = NULL,
+                                 explain = NULL) {
+  
+  # Display explanation if enabled
+  explanation_text <- "Creating contrast specifications for differential expression analysis."
+  example_code <- "# Create contrast specifications for differential expression analysis
+metadata <- data.frame(
+  sample_id = paste0(\"sample\", 1:8),
+  condition = rep(c(\"treatment\", \"control\"), each = 4),
+  batch = rep(c(\"batch1\", \"batch2\"), 4)
+)
+
+# 1. Using a condition column (all pairwise comparisons)
+# Create design formula
+design_formula <- ~ condition
+# Get condition levels
+conditions <- as.factor(metadata$condition)
+levels <- levels(conditions)
+
+# Set a reference level (e.g., control)
+reference_level <- \"control\"
+# Reorder levels to make reference level first
+levels <- c(reference_level, levels[levels != reference_level])
+conditions <- factor(conditions, levels = levels)
+
+# Create contrasts (e.g., treatment vs control)
+contrasts <- list()
+for (i in 2:length(levels)) {
+  contrast_name <- paste0(levels[i], \"_vs_\", levels[1])
+  contrasts[[contrast_name]] <- c(levels[i], levels[1])
+}
+
+# 2. Using manually specified contrasts
+manual_contrasts <- list(
+  treatment_vs_control = c(\"treatment\", \"control\")
+)
+
+# 3. Using coefficients for more complex designs
+# Design with batch effect
+design_formula <- ~ batch + condition
+# Use the coefficient for the condition term
+coef <- \"conditiontreatment\""
+  
+  display_explanation(explanation_text, example_code, "create_de_contrasts", explain)
   
   if (!inherits(tidyseq_object, "tidyseq")) {
     stop("Object must be of class 'tidyseq'")
@@ -134,6 +178,7 @@ create_de_contrasts <- function(tidyseq_object,
 #' @param lfc_threshold Log fold change threshold (default: 0)
 #' @param use_filtered Whether to use filtered counts (default: TRUE)
 #' @param use_normalized Whether to use pre-computed normalized counts (default: TRUE)
+#' @param explain Whether to show explanation for this function (default: use global setting)
 #'
 #' @return A tidyseq object with DE results
 #'
@@ -146,7 +191,54 @@ run_de_analysis <- function(tidyseq_object,
                              alpha = 0.05,
                              lfc_threshold = 0,
                              use_filtered = TRUE,
-                             use_normalized = TRUE) {
+                             use_normalized = TRUE,
+                             explain = NULL) {
+  
+  # Display explanation if enabled
+  explanation_text <- "Running differential expression analysis to identify genes that change between conditions."
+  example_code <- "# Run differential expression analysis with DESeq2
+library(DESeq2)
+
+# Create DESeq2 dataset
+dds <- DESeqDataSetFromMatrix(
+  countData = counts,
+  colData = metadata,
+  design = ~ condition
+)
+
+# Run DESeq2 analysis
+dds <- DESeq(dds)
+
+# Extract results for a specific contrast
+res <- results(dds, contrast = c(\"condition\", \"treatment\", \"control\"))
+
+# Filter significant genes
+alpha <- 0.05
+lfc_threshold <- 1  # log2 fold change threshold
+significant_genes <- res[!is.na(res$padj) & res$padj < alpha & abs(res$log2FoldChange) > lfc_threshold, ]
+
+# Alternative: limma-voom approach
+library(limma)
+library(edgeR)
+
+# Create design matrix
+design <- model.matrix(~ condition, data = metadata)
+
+# Create DGEList and calculate normalization factors
+dge <- DGEList(counts = counts)
+dge <- calcNormFactors(dge)
+
+# Run voom transformation
+v <- voom(dge, design)
+
+# Fit linear model
+fit <- lmFit(v, design)
+fit <- eBayes(fit)
+
+# Extract results
+top_genes <- topTable(fit, coef = 2, number = Inf)"
+  
+  display_explanation(explanation_text, example_code, "run_de_analysis", explain)
   
   if (!inherits(tidyseq_object, "tidyseq")) {
     stop("Object must be of class 'tidyseq'")

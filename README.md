@@ -9,6 +9,7 @@ TidySeq is an R package designed to simplify RNA-Seq analysis for researchers wi
 - **Informative Visualization**: Publication-ready plots for data exploration and result interpretation
 - **Robust Error Handling**: Clear error messages and validation to prevent common mistakes
 - **Automated Reporting**: Generate comprehensive HTML reports with a single function
+- **Educational Explanations**: Built-in explanations with example R code to help you understand what each function is doing
 - **Flexible Design**: Use the complete workflow or individual components as needed
 
 ## Installation
@@ -128,6 +129,36 @@ rnaseq <- create_full_report(
    - Publication-ready plots
    - Interactive visualizations
    - Comprehensive HTML reports
+
+## Educational Explanations
+
+TidySeq includes a unique feature that explains what each function is doing with example R code, helping you learn how RNA-Seq analysis works:
+
+```r
+# By default, explanations are enabled
+tidyseq_explanations_enabled()  # Returns TRUE
+
+# Run an analysis with explanations
+rnaseq <- import_data(
+  counts_file = "counts.csv",
+  metadata_file = "metadata.csv"
+)
+# This will display an explanation of what import_data() does
+
+# Turn explanations off globally
+tidyseq_explanations_off()
+
+# Turn explanations on globally
+tidyseq_explanations_on()
+
+# Control explanations for a specific function call
+rnaseq <- filter_low_counts(
+  rnaseq,
+  min_count = 10,
+  min_samples = 2,
+  explain = TRUE  # Override global setting for this call
+)
+```
 
 ## Documentation
 

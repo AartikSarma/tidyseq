@@ -23,6 +23,7 @@ NULL
 #' @param de_params List of parameters for DE analysis (passed to run_de_analysis)
 #' @param enrich_params List of parameters for enrichment analysis (optional)
 #' @param create_reports Whether to create HTML reports (default: TRUE)
+#' @param explain Whether to show explanations for each analysis step (default: use global setting)
 #'
 #' @return A tidyseq object with all analysis results
 #'
@@ -48,6 +49,14 @@ NULL
 #'   de_params = list(method = "limma-voom", alpha = 0.1),
 #'   enrich_params = list(run_go = TRUE, run_kegg = TRUE, run_gsea = FALSE)
 #' )
+#' 
+#' # Turn off explanations for specific workflow run
+#' results <- run_rnaseq_workflow(
+#'   counts_file = "counts.csv",
+#'   metadata_file = "metadata.csv",
+#'   condition_column = "treatment",
+#'   explain = FALSE
+#' )
 #' }
 #'
 #' @export
@@ -60,7 +69,52 @@ run_rnaseq_workflow <- function(counts_file,
                                  norm_params = list(),
                                  de_params = list(),
                                  enrich_params = list(),
-                                 create_reports = TRUE) {
+                                 create_reports = TRUE,
+                                 explain = NULL) {
+  
+  # Display explanation if enabled
+  explanation_text <- "Running a complete RNA-Seq analysis workflow from raw counts to enrichment analysis."
+  example_code <- "# Complete RNA-Seq workflow in R
+# 1. Import data
+counts <- read.csv(\"counts.csv\", row.names = 1)
+metadata <- read.csv(\"metadata.csv\", row.names = 1)
+
+# 2. Filter low-count genes
+keep <- rowSums(counts >= 10) >= 2
+filtered_counts <- counts[keep, ]
+
+# 3. Normalize data
+library(DESeq2)
+dds <- DESeqDataSetFromMatrix(
+  countData = filtered_counts,
+  colData = metadata,
+  design = ~ condition
+)
+dds <- estimateSizeFactors(dds)
+normalized_counts <- counts(dds, normalized = TRUE)
+
+# 4. Run differential expression analysis
+dds <- DESeq(dds)
+res <- results(dds, contrast = c(\"condition\", \"treatment\", \"control\"))
+sig_genes <- res[!is.na(res$padj) & res$padj < 0.05, ]
+
+# 5. Run enrichment analysis
+library(clusterProfiler)
+gene_list <- sig_genes$gene_id
+go_results <- enrichGO(gene = gene_list, 
+                      OrgDb = org.Hs.eg.db, 
+                      keyType = \"ENSEMBL\",
+                      ont = \"BP\")
+
+# 6. Create visualizations
+library(ggplot2)
+# Volcano plot
+volcano_plot <- ggplot(as.data.frame(res), aes(x = log2FoldChange, y = -log10(padj))) +
+  geom_point(aes(color = padj < 0.05), size = 1) +
+  scale_color_manual(values = c(\"gray\", \"red\")) +
+  labs(title = \"Volcano Plot\")"
+  
+  display_explanation(explanation_text, example_code, "run_rnaseq_workflow", explain)
   
   # Start TidySeq analysis
   tidyseq_obj <- tidyseq()
@@ -81,7 +135,8 @@ run_rnaseq_workflow <- function(counts_file,
   
   tidyseq_obj <- import_data(
     counts_file = counts_file,
-    metadata_file = metadata_file
+    metadata_file = metadata_file,
+    explain = explain
   )
   
   # Step 2: Filter low-count genes
@@ -95,7 +150,8 @@ run_rnaseq_workflow <- function(counts_file,
   filter_defaults <- list(
     min_count = 10, 
     min_samples = 2,
-    count_type = "raw"
+    count_type = "raw",
+    explain = explain
   )
   
   # Update with user-provided parameters
@@ -114,7 +170,8 @@ run_rnaseq_workflow <- function(counts_file,
   # Set default normalization parameters
   norm_defaults <- list(
     method = "DESeq2", 
-    use_filtered = TRUE
+    use_filtered = TRUE,
+    explain = explain
   )
   
   # Update with user-provided parameters
@@ -133,7 +190,8 @@ run_rnaseq_workflow <- function(counts_file,
   tidyseq_obj <- create_de_contrasts(
     tidyseq_object = tidyseq_obj,
     condition_column = condition_column,
-    reference_level = reference_level
+    reference_level = reference_level,
+    explain = explain
   )
   
   # Step 5: Run DE analysis
@@ -149,7 +207,8 @@ run_rnaseq_workflow <- function(counts_file,
     alpha = 0.05,
     lfc_threshold = 0,
     use_filtered = TRUE,
-    use_normalized = TRUE
+    use_normalized = TRUE,
+    explain = explain
   )
   
   # Update with user-provided parameters
@@ -177,7 +236,8 @@ run_rnaseq_workflow <- function(counts_file,
       organism = "hsa",
       gene_id_type = "ENSEMBL",
       p_cutoff = 0.05,
-      p_adj_cutoff = 0.05
+      p_adj_cutoff = 0.05,
+      explain = explain
     )
     
     # Update with user-provided parameters
@@ -273,11 +333,19 @@ run_rnaseq_workflow <- function(counts_file,
 #'
 #' @param tidyseq_object A tidyseq object
 #' @param file_path Path to save the object
+#' @param explain Whether to show explanation for this function (default: use global setting)
 #'
 #' @return Invisibly returns the file path
 #'
 #' @export
-save_analysis <- function(tidyseq_object, file_path) {
+save_analysis <- function(tidyseq_object, file_path, explain = NULL) {
+  # Display explanation if enabled
+  explanation_text <- "Saving TidySeq analysis results to a file for later use."
+  example_code <- "# Save analysis results to a file
+saveRDS(analysis_object, file = \"my_analysis.rds\")"
+  
+  display_explanation(explanation_text, example_code, "save_analysis", explain)
+  
   if (!inherits(tidyseq_object, "tidyseq")) {
     stop("Object must be of class 'tidyseq'")
   }
@@ -306,11 +374,19 @@ save_analysis <- function(tidyseq_object, file_path) {
 #' @description Load a TidySeq object from a file
 #'
 #' @param file_path Path to the saved tidyseq object
+#' @param explain Whether to show explanation for this function (default: use global setting)
 #'
 #' @return A tidyseq object
 #'
 #' @export
-load_analysis <- function(file_path) {
+load_analysis <- function(file_path, explain = NULL) {
+  # Display explanation if enabled
+  explanation_text <- "Loading previously saved TidySeq analysis results from a file."
+  example_code <- "# Load analysis results from a file
+analysis_object <- readRDS(\"my_analysis.rds\")"
+  
+  display_explanation(explanation_text, example_code, "load_analysis", explain)
+  
   if (!file.exists(file_path)) {
     stop("File not found: ", file_path)
   }

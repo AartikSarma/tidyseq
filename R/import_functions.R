@@ -9,6 +9,7 @@
 #' @param sample_column Column in metadata that identifies sample IDs (default: first column)
 #' @param gene_column Column in counts data that identifies gene IDs (default: first column)
 #' @param validate_ids Whether to validate matching of sample IDs (default: TRUE)
+#' @param explain Whether to show explanation for this function (default: use global setting)
 #'
 #' @return A tidyseq object with imported data
 #'
@@ -19,7 +20,26 @@ import_data <- function(counts_file,
                          metadata_format = "auto",
                          sample_column = NULL,
                          gene_column = NULL,
-                         validate_ids = TRUE) {
+                         validate_ids = TRUE,
+                         explain = NULL) {
+  
+  # Display explanation if enabled
+  explanation_text <- "Importing count data and metadata for RNA-Seq analysis."
+  example_code <- "# Import count data and metadata
+counts_file <- \"counts.csv\"  # A CSV file with genes as rows and samples as columns
+metadata_file <- \"metadata.csv\"  # A CSV file with samples as rows and features as columns
+
+# Manual approach to import data
+counts <- read.csv(counts_file, row.names = 1)
+metadata <- read.csv(metadata_file)
+rownames(metadata) <- metadata$sample_id  # Set sample IDs as rownames
+
+# Validate sample IDs match between counts and metadata
+common_samples <- intersect(colnames(counts), rownames(metadata))
+counts <- counts[, common_samples]  # Keep only matching samples
+metadata <- metadata[common_samples, ]"
+  
+  display_explanation(explanation_text, example_code, "import_data", explain)
   
   # Initialize tidyseq object
   tidyseq_obj <- tidyseq()
@@ -155,6 +175,7 @@ import_data <- function(counts_file,
 #' @param min_count Minimum count required in at least min_samples samples (default: 10)
 #' @param min_samples Minimum number of samples that must have min_count (default: 2)
 #' @param count_type Whether to filter on raw or CPM values (default: "raw")
+#' @param explain Whether to show explanation for this function (default: use global setting)
 #'
 #' @return A tidyseq object with filtered counts
 #'
@@ -162,7 +183,29 @@ import_data <- function(counts_file,
 filter_low_counts <- function(tidyseq_object, 
                                min_count = 10, 
                                min_samples = 2,
-                               count_type = "raw") {
+                               count_type = "raw",
+                               explain = NULL) {
+  
+  # Display explanation if enabled
+  explanation_text <- "Filtering out genes with low counts to remove noise from the dataset."
+  example_code <- "# Remove genes with low counts
+counts <- matrix(rpois(1000, lambda = 5), nrow = 100, ncol = 10)
+rownames(counts) <- paste0(\"gene\", 1:100)
+colnames(counts) <- paste0(\"sample\", 1:10)
+
+# Raw count filtering: Keep genes with at least 10 counts in at least 2 samples
+min_count <- 10
+min_samples <- 2
+keep <- rowSums(counts >= min_count) >= min_samples
+filtered_counts <- counts[keep, ]
+
+# CPM filtering using edgeR (better for samples with different library sizes)
+library(edgeR)
+cpm_counts <- edgeR::cpm(counts)
+keep_cpm <- rowSums(cpm_counts >= 1) >= min_samples  # 1 CPM is a common threshold
+filtered_counts_cpm <- counts[keep_cpm, ]"
+  
+  display_explanation(explanation_text, example_code, "filter_low_counts", explain)
   
   if (!inherits(tidyseq_object, "tidyseq")) {
     stop("Object must be of class 'tidyseq'")
@@ -234,6 +277,7 @@ filter_low_counts <- function(tidyseq_object,
 #' @param use_filtered Whether to use filtered counts (default: TRUE)
 #' @param design Formula specifying the design for DESeq2 normalization (default: ~ 1)
 #' @param gene_lengths Vector of gene lengths (required for TPM normalization)
+#' @param explain Whether to show explanation for this function (default: use global setting)
 #'
 #' @return A tidyseq object with normalized counts
 #'
@@ -242,7 +286,41 @@ normalize_counts <- function(tidyseq_object,
                               method = "DESeq2",
                               use_filtered = TRUE,
                               design = ~ 1,
-                              gene_lengths = NULL) {
+                              gene_lengths = NULL,
+                              explain = NULL) {
+  
+  # Display explanation if enabled
+  explanation_text <- "Normalizing RNA-Seq counts to account for technical biases and enable fair comparisons."
+  example_code <- "# Normalize RNA-Seq count data
+library(DESeq2)
+library(edgeR)
+
+# DESeq2 normalization
+# Create DESeq2 object
+dds <- DESeqDataSetFromMatrix(
+  countData = counts,
+  colData = metadata,
+  design = ~ condition
+)
+# Estimate size factors
+dds <- estimateSizeFactors(dds)
+# Get normalized counts
+deseq2_norm_counts <- counts(dds, normalized = TRUE)
+
+# TMM normalization with edgeR
+dge <- DGEList(counts = counts)
+dge <- calcNormFactors(dge, method = \"TMM\")
+tmm_norm_counts <- cpm(dge, log = FALSE) * 1e6
+
+# Simple CPM normalization
+cpm_counts <- cpm(counts) * 1e6
+
+# TPM normalization (for RNA-Seq with gene length information)
+# Calculate TPM manually
+rate <- counts / gene_lengths
+tpm_counts <- t(t(rate) / colSums(rate) * 1e6)"
+  
+  display_explanation(explanation_text, example_code, "normalize_counts", explain)
   
   if (!inherits(tidyseq_object, "tidyseq")) {
     stop("Object must be of class 'tidyseq'")

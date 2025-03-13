@@ -7,6 +7,8 @@ Description: TidySeq simplifies RNA-Seq analysis for researchers with limited
     programming experience. It provides a streamlined workflow for data import, 
     quality control, normalization, differential expression analysis, pathway 
     enrichment, and visualization with robust error handling and guidance.
+    Includes an educational component that explains what each function does with
+    example R code to help users understand the underlying processes.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
