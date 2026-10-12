@@ -1,7 +1,7 @@
 Package: tidyseq
 Type: Package
 Title: Transcriptomics and Pathway Analysis Tools
-Version: 0.1.1
+Version: 0.1.2
 Author: Aartik Sarma
 Maintainer: Aartik Sarma <aartik.sarma@ucsf.edu>
 Description: This library includes functions for common tasks in sequencing, differential expression, and pathway analysis.
@@ -11,19 +11,29 @@ LazyData: true
 Depends: 
   tidyverse, 
   Biobase
-Imports: 
-  AnnotationDbi,
-  DESeq2,
-  dplyr,
-  edgeR,
-  fgsea,
-  ggplot2,
-  ggrepel,
+Imports:
+    AnnotationDbi,
+    BiocParallel,
+    DESeq2,
+    dplyr,
+    edgeR,
+    fgsea,
+    ggforestplot,
+    ggplot2,
+    ggrepel,
     GSVA,
+    IHW,
     limma,
     msigdbr,
+    plyr,
+    scales,
+    stringr,
     tibble,
-    tidyverse
+    tidyr,
+    tidyverse,
+    variancePartition
+Remotes:
+    NightingaleHealth/ggforestplot
 Suggests: 
     knitr,
     rmarkdown
