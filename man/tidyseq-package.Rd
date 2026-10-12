@@ -11,11 +11,11 @@ quality control, normalization, differential expression analysis, pathway
 enrichment, and visualization with robust error handling and guidance.
 }
 \author{
-\strong{Maintainer}: Your Name \email{your.email@example.com}
+\strong{Maintainer}: Aartik Sarma \email{aartiksarma@gmail.com}
 
 Authors:
 \itemize{
-  \item Your Name \email{your.email@example.com}
+  \item Aartik Sarma \email{aartiksarma@gmail.com}
 }
 
 }

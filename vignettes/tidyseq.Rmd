@@ -1,6 +1,6 @@
 ---
 title: "Getting Started with TidySeq"
-author: "Your Name"
+author: "Aartik Sarma"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
