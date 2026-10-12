@@ -1,6 +1,6 @@
 Package: tidyseq
 Title: User-Friendly RNA-Seq Analysis for Researchers with Limited Programming Experience
-Version: 1.0.0-alpha
+Version: 0.99.0
 Authors@R: 
     person("Your", "Name", email = "your.email@example.com", role = c("aut", "cre"))
 Description: TidySeq simplifies RNA-Seq analysis for researchers with limited 
@@ -12,7 +12,6 @@ Description: TidySeq simplifies RNA-Seq analysis for researchers with limited
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
 Imports:
     dplyr,
     tidyr,
@@ -34,3 +33,4 @@ Suggests:
     CEMiTool
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.1

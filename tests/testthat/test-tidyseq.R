@@ -123,23 +123,15 @@ test_that("normalize_counts normalizes data correctly", {
   obj$metadata <- test_data$metadata
   obj$filtered_counts <- test_data$counts
   
-  # Mock the DESeq2 functions to avoid dependency in tests
-  # In a real test, you'd use the actual DESeq2 functions
-  with_mock(
-    `DESeq2::DESeqDataSetFromMatrix` = function(...) list(),
-    `DESeq2::estimateSizeFactors` = function(x) x,
-    `DESeq2::counts` = function(x, normalized) test_data$counts,
-    {
-      # Normalize counts
-      obj <- normalize_counts(
-        obj,
-        method = "DESeq2"
-      )
-      
-      # Check that data was normalized correctly
-      expect_s3_class(obj, "tidyseq")
-      expect_equal(dim(obj$normalized_counts), c(20, 5))
-      expect_equal(obj$normalization_method, "DESeq2")
-    }
+  # Normalize counts with DESeq2 itself (testthat 3.2 made with_mock() defunct)
+  obj <- normalize_counts(
+    obj,
+    method = "DESeq2",
+    explain = FALSE
   )
+
+  # Check that data was normalized correctly
+  expect_s3_class(obj, "tidyseq")
+  expect_equal(dim(obj$normalized_counts), c(20, 5))
+  expect_equal(obj$normalization_method, "DESeq2")
 })

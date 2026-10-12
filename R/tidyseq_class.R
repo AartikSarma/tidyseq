@@ -180,7 +180,10 @@ add_message <- function(tidyseq_object, message, type = "log") {
   timestamp <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
   formatted_message <- paste0("[", timestamp, "] ", message)
   
-  tidyseq_object[[type]] <- c(tidyseq_object[[type]], formatted_message)
+  # The object stores each type in a plural slot ("warnings", "errors", ...),
+  # except the log, which is singular.
+  slot_name <- if (type == "log") "log" else paste0(type, "s")
+  tidyseq_object[[slot_name]] <- c(tidyseq_object[[slot_name]], formatted_message)
   
   if (type %in% c("warning", "error")) {
     if (type == "warning") {
