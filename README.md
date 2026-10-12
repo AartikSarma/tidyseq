@@ -24,6 +24,12 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 devtools::install_github("AartikSarma/tidyseq")
 ```
 
+The analyses in the AJRCCM ARDS phenotypes paper used tidyseq 0.1, an earlier package with different functions (`ensembl_to_hgnc()`, `plot_volcano()`, `dge_to_gsea()`). To run that code, install the preserved version instead:
+
+```r
+pak::pak("AartikSarma/tidyseq@v0.1.2")
+```
+
 ## Quick Start
 
 ```r
